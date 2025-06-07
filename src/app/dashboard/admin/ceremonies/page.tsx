@@ -11,7 +11,7 @@ import { collection, getDocs, query, orderBy, Timestamp, doc, deleteDoc } from "
 import { CalendarDays, PlusCircle, Trash2, Edit, ShieldCheck, Image as ImageIcon, Video } from "lucide-react";
 import Image from "next/image"; 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Added useCallback
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import CeremonyForm from "@/components/admin/CeremonyForm";
@@ -45,6 +45,7 @@ export default function AdminCeremoniesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingCeremony, setEditingCeremony] = useState<Ceremony | null>(null);
 
+  // Effect for redirection
   useEffect(() => {
     if (!authLoading && userProfile &&
         (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
@@ -52,7 +53,7 @@ export default function AdminCeremoniesPage() {
     }
   }, [userProfile, authLoading, router]);
 
-  const fetchCeremonies = async () => {
+  const fetchCeremonies = useCallback(async () => {
     setLoadingData(true);
     try {
       const ceremoniesQuery = query(collection(db, CEREMONIES_COLLECTION), orderBy("date", "desc"));
@@ -68,13 +69,20 @@ export default function AdminCeremoniesPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [t, toast]); // Dependencies for fetchCeremonies
 
+  // Effect for data fetching
   useEffect(() => {
-    if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
-      fetchCeremonies();
+    if (!authLoading && userProfile) {
+      if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
+        fetchCeremonies();
+      } else {
+        setLoadingData(false);
+      }
+    } else if (!authLoading && !userProfile) {
+      setLoadingData(false);
     }
-  }, [userProfile, t, toast]);
+  }, [userProfile, authLoading, fetchCeremonies]);
 
   const handleCeremonySaved = (savedCeremony: Ceremony) => {
     if (editingCeremony) {
@@ -109,7 +117,7 @@ export default function AdminCeremoniesPage() {
     }
   };
 
-  if (authLoading || (!userProfile && !authLoading)) {
+  if (authLoading) { 
     return ( <div> <PageTitle title={t('admin.ceremonies.pageTitle')} /> <Skeleton className="h-12 w-32 mb-6" /> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)} </div> </div> );
   }
 

@@ -11,7 +11,7 @@ import { collection, getDocs, query, orderBy, Timestamp, doc, deleteDoc } from "
 import { CalendarClock, MapPin, PlusCircle, Trash2, Edit, ListChecks } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Added useCallback
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import EventForm from "@/components/admin/EventForm";
@@ -54,6 +54,7 @@ export default function AdminEventsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
 
+  // Effect for redirection
   useEffect(() => {
     if (!authLoading && userProfile &&
         (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
@@ -61,7 +62,7 @@ export default function AdminEventsPage() {
     }
   }, [userProfile, authLoading, router]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoadingData(true);
     try {
       const eventsQuery = query(collection(db, EVENTS_COLLECTION), orderBy("date", "desc"));
@@ -77,13 +78,20 @@ export default function AdminEventsPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [t, toast]); // Dependencies for fetchEvents
 
+  // Effect for data fetching
   useEffect(() => {
-    if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
-      fetchEvents();
+    if (!authLoading && userProfile) {
+      if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
+        fetchEvents();
+      } else {
+        setLoadingData(false);
+      }
+    } else if (!authLoading && !userProfile) {
+      setLoadingData(false);
     }
-  }, [userProfile, t, toast]);
+  }, [userProfile, authLoading, fetchEvents]);
 
   const handleEventSaved = (savedEvent: ChurchEvent) => {
      if (editingEvent) {
@@ -118,7 +126,7 @@ export default function AdminEventsPage() {
     }
   };
   
-  if (authLoading || (!userProfile && !authLoading)) {
+  if (authLoading) {
      return (
       <div>
         <PageTitle title={t('admin.events.pageTitle')} />

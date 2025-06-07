@@ -11,7 +11,7 @@ import { collection, getDocs, query, orderBy, doc, deleteDoc } from "firebase/fi
 import { BookOpen, Download, PlusCircle, Trash2, Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Added useCallback
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import BookForm from "@/components/admin/BookForm";
@@ -40,6 +40,7 @@ export default function AdminBooksPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
 
+  // Effect for redirection based on authorization
   useEffect(() => {
     if (!authLoading && userProfile && 
         (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
@@ -47,7 +48,7 @@ export default function AdminBooksPage() {
     }
   }, [userProfile, authLoading, router]);
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     setLoadingData(true);
     try {
       const booksQuery = query(collection(db, BOOKS_COLLECTION), orderBy("uploadedAt", "desc"));
@@ -63,13 +64,24 @@ export default function AdminBooksPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [t, toast]); // Dependencies for fetchBooks
 
+  // Effect for data fetching
   useEffect(() => {
-    if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
-      fetchBooks();
+    if (!authLoading && userProfile) {
+      if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
+        fetchBooks();
+      } else {
+        // Not authorized for this specific data, stop loading
+        setLoadingData(false);
+      }
+    } else if (!authLoading && !userProfile) {
+      // Auth done, but no user profile
+      setLoadingData(false);
     }
-  }, [userProfile, t, toast]); // Added t and toast to dependencies
+    // If authLoading is true, effect does nothing and waits for authLoading or userProfile to change
+  }, [userProfile, authLoading, fetchBooks]);
+
 
   const handleBookSaved = (savedBook: Book) => {
     if (editingBook) {
@@ -104,7 +116,7 @@ export default function AdminBooksPage() {
     }
   };
 
-  if (authLoading || (!userProfile && !authLoading)) {
+  if (authLoading) { // Simplified initial loading check
     return (
       <div>
         <PageTitle title={t('admin.books.title')} />
