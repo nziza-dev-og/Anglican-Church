@@ -1,7 +1,7 @@
 
 "use client";
 import PageTitle from "@/components/shared/PageTitle";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { USERS_COLLECTION, USER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/firebase";
