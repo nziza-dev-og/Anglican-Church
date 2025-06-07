@@ -3,10 +3,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/AuthContext';
-import { LanguageProvider } from '@/contexts/LanguageContext'; // Import LanguageProvider
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 export const metadata: Metadata = {
-  title: 'Rubavu Anglican Connect', // This could also be translated if needed via a more advanced setup
+  title: 'Rubavu Anglican Connect',
   description: 'Digital platform for the Anglican Church in Rubavu.',
 };
 
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en"> {/* Consider dynamically setting lang based on currentLocale */}
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -25,7 +25,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-          <LanguageProvider> {/* Wrap with LanguageProvider */}
+          <LanguageProvider>
             {children}
             <Toaster />
           </LanguageProvider>
