@@ -1,3 +1,4 @@
+
 "use client";
 import type { ChurchEvent } from "@/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CalendarDays, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
-import { collection, getDocs, limit, orderBy, query, Timestamp } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { EVENTS_COLLECTION } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,17 +30,37 @@ export default function FeaturedEvents() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        const today = Timestamp.now();
         const eventsQuery = query(
           collection(db, EVENTS_COLLECTION),
+          where("date", ">=", today), // Fetch upcoming or ongoing events
           orderBy("date", "asc"),
           limit(3)
         );
         const querySnapshot = await getDocs(eventsQuery);
-        const fetchedEvents: ChurchEvent[] = [];
+        let fetchedEvents: ChurchEvent[] = [];
         querySnapshot.forEach((doc) => {
           fetchedEvents.push({ id: doc.id, ...doc.data() } as ChurchEvent);
         });
-        setEvents(fetchedEvents);
+
+        // If fewer than 3 upcoming events, fetch recent past events to fill up
+        if (fetchedEvents.length < 3) {
+          const pastEventsQuery = query(
+            collection(db, EVENTS_COLLECTION),
+            where("date", "<", today),
+            orderBy("date", "desc"),
+            limit(3 - fetchedEvents.length)
+          );
+          const pastQuerySnapshot = await getDocs(pastEventsQuery);
+          pastQuerySnapshot.forEach((doc) => {
+            fetchedEvents.push({ id: doc.id, ...doc.data() } as ChurchEvent);
+          });
+          // Re-sort if past events were added
+          fetchedEvents.sort((a, b) => (a.date as Timestamp).toMillis() - (b.date as Timestamp).toMillis());
+        }
+        
+        setEvents(fetchedEvents.slice(0,3)); // Ensure only 3 are shown
+
       } catch (error) {
         console.error("Error fetching events:", error);
       } finally {
@@ -105,6 +126,11 @@ export default function FeaturedEvents() {
                   />
                 </div>
               )}
+               {!event.imageUrl && (
+                 <div className="relative h-56 w-full bg-secondary/30 flex items-center justify-center">
+                    <CalendarDays className="h-16 w-16 text-muted-foreground" />
+                 </div>
+               )}
               <CardHeader className="pb-2">
                 <CardTitle className="font-headline text-xl text-primary">{event.title}</CardTitle>
               </CardHeader>
@@ -124,8 +150,8 @@ export default function FeaturedEvents() {
                 </CardDescription>
               </CardContent>
               <CardFooter>
-                <Button asChild variant="link" className="text-primary p-0 hover:text-accent">
-                  <Link href={`/events/${event.id}`}>Learn More &rarr;</Link>
+                <Button asChild variant="outline" className="text-primary p-0 hover:text-accent w-full">
+                  <Link href={`/events/${event.id}`}>View Details</Link>
                 </Button>
               </CardFooter>
             </Card>
