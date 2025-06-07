@@ -15,8 +15,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from '@/components/shared/Logo';
 import { useAuth } from '@/hooks/useAuth';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { SidebarNav } from './SidebarNav'; // Assuming SidebarNav will be created
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"; // Added SheetClose
+import { SidebarNav } from './SidebarNav'; 
+import type { ComponentPropsWithoutRef, ElementRef } from 'react'; // For SheetClose type
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
@@ -26,13 +27,13 @@ const NAV_ITEMS = [
   { label: 'Unions', href: '/unions' },
   { label: 'Videos', href: '/videos' },
   { label: 'Ceremonies', href: '/ceremonies' },
-  // { label: 'Chat', href: '/chat' }, // Chat might be part of dashboard or specific groups
   { label: 'Contact', href: '/contact' },
 ];
 
 export default function Header() {
   const { user, userProfile, logout } = useAuth();
   const router = useRouter();
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -43,18 +44,22 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
-          <Sheet>
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="mr-2 md:hidden">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <div className="p-4">
+            <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
+              <div className="p-4 border-b border-sidebar-border">
                 <Logo textSize="text-2xl" />
               </div>
-              <SidebarNav items={NAV_ITEMS} isMobile={true} />
+              <SidebarNav 
+                items={NAV_ITEMS} 
+                isMobile={true} 
+                onLinkClick={() => setMobileNavOpen(false)} // Close sheet on link click
+              />
             </SheetContent>
           </Sheet>
           <Logo className="hidden md:flex" />
@@ -129,4 +134,6 @@ export default function Header() {
           )}
         </div>
       </div>
-    
+    </header>
+  );
+}

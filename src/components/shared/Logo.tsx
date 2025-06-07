@@ -18,3 +18,6 @@ const Logo = ({ className, iconSize = 24, textSize = "text-xl" }: LogoProps) => 
       </span>
     </Link>
   );
+};
+
+export default Logo;
