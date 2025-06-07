@@ -23,16 +23,7 @@ import { VIDEOS_COLLECTION } from "@/lib/constants";
 import type { Video } from "@/types";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-
-const videoFormSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
-  description: z.string().optional(),
-  videoUrl: z.string().url({ message: "Please enter a valid video URL." }),
-  thumbnailUrl: z.string().url({ message: "Please enter a valid thumbnail URL." }).optional().or(z.literal('')),
-  category: z.string().optional(),
-});
-
-type VideoFormValues = z.infer<typeof videoFormSchema>;
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface VideoFormProps {
   onVideoSaved: (video: Video) => void;
@@ -42,7 +33,18 @@ interface VideoFormProps {
 export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+
+  const videoFormSchema = z.object({
+    title: z.string().min(3, { message: t('bookForm.title.error') }), // Re-use
+    description: z.string().optional(),
+    videoUrl: z.string().url({ message: t('contact.form.email.error') }), // Re-use
+    thumbnailUrl: z.string().url({ message: t('contact.form.email.error') }).optional().or(z.literal('')), // Re-use
+    category: z.string().optional(),
+  });
+  
+  type VideoFormValues = z.infer<typeof videoFormSchema>;
 
   const form = useForm<VideoFormValues>({
     resolver: zodResolver(videoFormSchema),
@@ -77,7 +79,7 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
 
   async function onSubmit(data: VideoFormValues) {
     if (!user) {
-      toast({ title: "Error", description: "You must be logged in.", variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('general.error.mustBeLoggedIn'), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -85,7 +87,7 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
     try {
       const videoData = {
         ...data,
-        thumbnailUrl: data.thumbnailUrl || undefined, // Store undefined if empty string
+        thumbnailUrl: data.thumbnailUrl || undefined, 
         uploadedBy: user.uid,
       };
 
@@ -95,7 +97,7 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           ...videoData,
           updatedAt: serverTimestamp(),
         });
-        toast({ title: "Video Updated", description: `"${data.title}" has been successfully updated.` });
+        toast({ title: t('videoForm.toast.updated.title'), description: `"${data.title}" ${t('videoForm.toast.updated.description')}` });
         onVideoSaved({ ...editingVideo, ...videoData, updatedAt: new Date() } as Video);
       } else {
         const docRef = await addDoc(collection(db, VIDEOS_COLLECTION), {
@@ -103,13 +105,13 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           uploadedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
-        toast({ title: "Video Added", description: `"${data.title}" has been successfully added.` });
+        toast({ title: t('videoForm.toast.added.title'), description: `"${data.title}" ${t('videoForm.toast.added.description')}` });
         onVideoSaved({ id: docRef.id, ...videoData, uploadedAt: new Date(), updatedAt: new Date() } as Video);
       }
-      form.reset(); // Reset form after successful submission
+      form.reset(); 
     } catch (error) {
       console.error("Error saving video:", error);
-      toast({ title: "Failed to Save Video", description: "Could not save the video. Please try again.", variant: "destructive" });
+      toast({ title: t('videoForm.toast.failed.title'), description: t('videoForm.toast.failed.description'), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -123,9 +125,9 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Video Title</FormLabel>
+              <FormLabel>{t('videoForm.title.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="Sermon on Faith" {...field} />
+                <Input placeholder={t('videoForm.title.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -136,9 +138,9 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description (Optional)</FormLabel>
+              <FormLabel>{t('videoForm.description.label')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="A brief summary of the video..." {...field} />
+                <Textarea placeholder={t('videoForm.description.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -149,11 +151,11 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           name="videoUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Video URL</FormLabel>
+              <FormLabel>{t('videoForm.videoUrl.label')}</FormLabel>
               <FormControl>
-                <Input type="url" placeholder="https://youtube.com/watch?v=..." {...field} />
+                <Input type="url" placeholder={t('videoForm.videoUrl.placeholder')} {...field} />
               </FormControl>
-              <FormDescription>Link to YouTube, Vimeo, or a direct video file (.mp4, .webm).</FormDescription>
+              <FormDescription>{t('videoForm.videoUrl.description')}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -163,11 +165,11 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           name="thumbnailUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Thumbnail URL (Optional)</FormLabel>
+              <FormLabel>{t('videoForm.thumbnailUrl.label')}</FormLabel>
               <FormControl>
-                <Input type="url" placeholder="https://example.com/thumbnail.jpg" {...field} />
+                <Input type="url" placeholder={t('videoForm.thumbnailUrl.placeholder')} {...field} />
               </FormControl>
-              <FormDescription>Direct link to an image for the video thumbnail.</FormDescription>
+              <FormDescription>{t('videoForm.thumbnailUrl.description')}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -177,9 +179,9 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category (Optional)</FormLabel>
+              <FormLabel>{t('videoForm.category.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Sermon, Event Highlight, Music" {...field} />
+                <Input placeholder={t('videoForm.category.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -187,7 +189,7 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
         />
         <Button type="submit" disabled={loading} className="w-full btn-animated">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {editingVideo ? "Save Changes" : "Add Video"}
+          {editingVideo ? t('videoForm.button.save') : t('videoForm.button.add')}
         </Button>
       </form>
     </Form>

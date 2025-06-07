@@ -7,12 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 // TODO: Implement actual choir management (members, choir-specific events).
 // For now, this is a placeholder page for Choir Admins.
 
 export default function ManageChoirPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!authLoading && userProfile && userProfile.role !== USER_ROLES.CHOIR_ADMIN) {
@@ -23,7 +25,7 @@ export default function ManageChoirPage() {
   if (authLoading || (!userProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="Manage My Choir" />
+        <PageTitle title={t('dashboard.choirAdmin.manage.pageTitle')} />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -32,17 +34,16 @@ export default function ManageChoirPage() {
   return (
     <div>
       <PageTitle
-        title="Manage My Choir"
-        subtitle="Administer your choir members, events, and announcements."
+        title={t('dashboard.choirAdmin.manage.pageTitle')}
+        subtitle={t('dashboard.choirAdmin.manage.pageSubtitle')}
       />
       <Card>
         <CardHeader>
-          <CardTitle>Choir Administration</CardTitle>
+          <CardTitle>{t('dashboard.choirAdmin.manage.cardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            As a Choir Admin, you can manage your choir's members (approve requests, view list),
-            schedule practices or choir-specific events, and post announcements for your choir.
+            {t('dashboard.choirAdmin.manage.description')}
           </p>
           {/* Placeholder for Choir Member Management, Choir Event Form, etc. */}
         </CardContent>

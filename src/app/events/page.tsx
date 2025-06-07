@@ -13,6 +13,7 @@ import { CalendarClock, MapPin, ListChecks } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const formatDate = (timestamp: Timestamp | Date, includeTime: boolean = true) => {
   const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
@@ -25,12 +26,13 @@ const formatDate = (timestamp: Timestamp | Date, includeTime: boolean = true) =>
     options.hour = '2-digit';
     options.minute = '2-digit';
   }
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('en-US', options); // Consider making locale dynamic
 };
 
 export default function EventsPage() {
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -55,8 +57,8 @@ export default function EventsPage() {
   return (
     <AppLayout>
       <PageTitle
-        title="Church Events"
-        subtitle="Stay updated with all our upcoming and past church events."
+        title={t('events.title')}
+        subtitle={t('events.subtitle')}
       />
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -80,8 +82,8 @@ export default function EventsPage() {
       ) : events.length === 0 ? (
         <div className="text-center py-12">
           <ListChecks className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Events Found</h3>
-          <p className="text-muted-foreground">There are currently no events scheduled. Please check back soon!</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('events.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('events.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -123,7 +125,7 @@ export default function EventsPage() {
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full btn-animated" variant="outline">
-                  <Link href={`/events/${event.id}`}>View Details</Link>
+                  <Link href={`/events/${event.id}`}>{t('general.viewDetails')}</Link>
                 </Button>
               </CardFooter>
             </Card>

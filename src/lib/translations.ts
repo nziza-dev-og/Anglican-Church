@@ -56,6 +56,25 @@ export const translations: Translations = {
   'auth.register.title': placeholder('Create Your Account'),
   'auth.register.hasAccount': placeholder('Already have an account?'),
   'auth.welcomeMessage': placeholder('Welcome to Rubavu Anglican Connect'),
+  'auth.email.label': placeholder('Email'),
+  'auth.email.placeholder': placeholder('your@email.com'),
+  'auth.password.label': placeholder('Password'),
+  'auth.password.placeholder': placeholder('••••••••'),
+  'auth.password.errorMinLength': placeholder('Password must be at least 6 characters.'),
+  'auth.login.error.invalidCredentials': placeholder('Invalid email or password. Please try again.'),
+  'auth.login.success.title': placeholder('Login Successful'),
+  'auth.login.success.description': placeholder('Welcome back!'),
+  'auth.displayName.label': placeholder('Display Name'),
+  'auth.displayName.placeholder': placeholder('John Doe'),
+  'auth.displayName.errorMinLength': placeholder('Display name must be at least 2 characters.'),
+  'auth.confirmPassword.label': placeholder('Confirm Password'),
+  'auth.confirmPassword.errorMatch': placeholder("Passwords don't match"),
+  'auth.secretCode.label': placeholder('Secret Code (Optional)'),
+  'auth.secretCode.placeholder': placeholder('Enter if you have a special role code'),
+  'auth.secretCode.description': placeholder('For Church, Choir, or Union Admins.'),
+  'auth.register.success.title': placeholder('Registration Successful'),
+  'auth.register.success.description': placeholder('Your account has been created.'),
+  'auth.register.error.emailInUse': placeholder('This email is already registered. Please login or use a different email.'),
 
 
   // Header Dropdown
@@ -65,7 +84,7 @@ export const translations: Translations = {
   'header.logout': { en: 'Log out', rw: 'Sohoka', fr: 'Déconnexion', sw: 'Toka', es: 'Cerrar Sesión', de: 'Abmelden' },
   'header.selectLanguage': placeholder('Select Language'),
   'header.languages': placeholder('Languages'),
-  'header.userRole': placeholder('Role:'),
+  'header.userRole': placeholder('Role:'), // Role name will be appended
 
 
   // Footer
@@ -92,6 +111,12 @@ export const translations: Translations = {
   'general.error.unexpected': placeholder('An unexpected error occurred. Please try again.'),
   'general.success': placeholder('Success!'),
   'general.failure': placeholder('Failed'),
+  'general.notAvailableShort': placeholder('N/A'),
+  'general.search': placeholder('Search...'),
+  'general.clear': placeholder('Clear'),
+  'general.error.title': placeholder('Error'),
+  'general.confirmation.title': placeholder('Are you sure?'),
+  'general.confirmation.cannotBeUndone': placeholder('This action cannot be undone.'),
 
   // About Page
   'about.title': placeholder('About Us'),
@@ -144,6 +169,18 @@ export const translations: Translations = {
   'contact.info.email.value': placeholder('info@rubavuanglican.org'),
   'contact.findUs.title': placeholder('Find Us'),
 
+  // User Roles
+  'userRoles.superAdmin': placeholder('Super Admin'),
+  'userRoles.churchAdmin': placeholder('Church Admin'),
+  'userRoles.pastor': placeholder('Pastor'),
+  'userRoles.chiefPastor': placeholder('Chief Pastor'),
+  'userRoles.diacon': placeholder('Diacon'),
+  'userRoles.choirAdmin': placeholder('Choir Admin'),
+  'userRoles.choirMember': placeholder('Choir Member'),
+  'userRoles.unionAdmin': placeholder('Union Admin'),
+  'userRoles.unionMember': placeholder('Union Member'),
+  'userRoles.regularMember': placeholder('Regular Member'),
+
   // Dashboard Main Page
   'dashboard.welcome': placeholder('Welcome,'), // Name will be appended
   'dashboard.overviewSubtitle': placeholder("Here's an overview of your dashboard. Your role:"), // Role will be appended
@@ -176,6 +213,27 @@ export const translations: Translations = {
   'dashboard.choirAdmin.manage.description': placeholder('Administer your choir members and events.'),
   'dashboard.unionAdmin.manage.title': placeholder('Manage My Union'),
   'dashboard.unionAdmin.manage.description': placeholder('Administer your union members and events.'),
+
+  // Dashboard Profile Page
+  'dashboard.profile.pageTitle': placeholder('My Profile'),
+  'dashboard.profile.pageSubtitle': placeholder('View and update your personal information.'),
+  'dashboard.profile.form.editTitle': placeholder('Edit Your Profile'),
+  'dashboard.profile.form.displayName.label': placeholder('Display Name'),
+  'dashboard.profile.form.displayName.description': placeholder('This is your public display name.'),
+  'dashboard.profile.form.photo.label': placeholder('Profile Picture'),
+  'dashboard.profile.form.photo.description': placeholder('Upload a new profile picture (optional).'),
+  'dashboard.profile.form.interests.label': placeholder('Interests'),
+  'dashboard.profile.form.interests.description': placeholder('List your interests to help us personalize your experience. Separate interests with a comma.'),
+  'dashboard.profile.form.interests.placeholder': placeholder('E.g. Bible Study, Music, Community Service...'),
+  'dashboard.profile.form.interests.example': placeholder('Example: Music, Bible Study, Youth Ministry'),
+  'dashboard.profile.form.button.update': placeholder('Update Profile'),
+  'dashboard.profile.toast.updated.title': placeholder('Profile Updated'),
+  'dashboard.profile.toast.updated.description': placeholder('Your profile has been successfully updated.'),
+  'dashboard.profile.toast.updateFailed.title': placeholder('Update Failed'),
+  'dashboard.profile.toast.updateFailed.description': placeholder('Could not update your profile. Please try again.'),
+  'dashboard.profile.loading': placeholder('Loading profile...'),
+  'dashboard.profile.notLoggedIn': placeholder('Please log in to view your profile.'),
+
 
   // Admin Books Page
   'admin.books.title': placeholder('Manage Books'),
@@ -252,6 +310,298 @@ export const translations: Translations = {
   'home.recommendations.subtitle': placeholder('Personalized suggestions based on your profile and interests.'),
   'home.recommendations.error': placeholder('Could not load recommendations at this time.'),
   'home.recommendations.button.checkItOut': placeholder('Check it out'),
+
+  // Books Page (Public)
+  'books.title': placeholder('Digital Library'),
+  'books.subtitle': placeholder('Explore our collection of Christian literature and resources.'),
+  'books.empty.title': placeholder('No Books Available'),
+  'books.empty.description': placeholder('Our digital library is currently empty. Please check back soon.'),
+
+  // Ceremonies Page (Public)
+  'ceremonies.title': placeholder('Church Ceremonies'),
+  'ceremonies.subtitle': placeholder('Memories and details from our special church ceremonies and celebrations.'),
+  'ceremonies.empty.title': placeholder('No Ceremonies Recorded'),
+  'ceremonies.empty.description': placeholder('Details about past ceremonies will be available here soon.'),
+  'ceremonies.card.type': placeholder('Type:'),
+  'ceremonies.card.noDetails': placeholder('No specific details provided.'),
+
+  // Choirs Page (Public)
+  'choirs.title': placeholder('Our Choirs'),
+  'choirs.subtitle': placeholder('Discover the talented choirs of Rubavu Anglican Church.'),
+  'choirs.empty.title': placeholder('No Choirs Found'),
+  'choirs.empty.description': placeholder('Information about our choirs will be available soon.'),
+  'choirs.card.chamber': placeholder('Chamber:'),
+  'choirs.card.ledBy': placeholder('Led by dedicated administrators.'),
+
+  // Events Page (Public)
+  'events.title': placeholder('Church Events'),
+  'events.subtitle': placeholder('Stay updated with all our upcoming and past church events.'),
+  'events.empty.title': placeholder('No Events Found'),
+  'events.empty.description': placeholder('There are currently no events scheduled. Please check back soon!'),
+
+  // Event Detail Page (/events/[id])
+  'eventDetail.backButton': placeholder('Back to Events'),
+  'eventDetail.notFound': placeholder('Event not found.'),
+  'eventDetail.failToLoad': placeholder('Failed to load event details.'),
+  'eventDetail.notFound.description': placeholder('The event you are looking for might have been removed or the link is incorrect.'),
+  'eventDetail.unavailable': placeholder('Event details are unavailable.'),
+
+  // Unions Page (Public)
+  'unions.title': placeholder('Church Unions'),
+  'unions.subtitle': placeholder('Learn about our Mothers Union, Fathers Union, and other fellowship groups.'),
+  'unions.empty.title': placeholder('No Unions Found'),
+  'unions.empty.description': placeholder('Information about our church unions will be available soon.'),
+  'unions.card.fellowship': placeholder('Fostering fellowship and spiritual growth.'),
+
+  // Videos Page (Public)
+  'videos.title': placeholder('Video Gallery'),
+  'videos.subtitle': placeholder('Watch sermons, event highlights, and other inspirational videos.'),
+  'videos.empty.title': placeholder('No Videos Available'),
+  'videos.empty.description': placeholder('Our video gallery is currently empty. Please check back soon.'),
+  'videos.card.watch': placeholder('Watch Video'),
+
+  // Admin Users Page
+  'admin.users.pageTitle': placeholder('Manage Users'),
+  'admin.users.pageSubtitle': placeholder('View and manage user roles within the application.'),
+  'admin.users.listTitle': placeholder('User List'),
+  'admin.users.total': placeholder('Total Users:'),
+  'admin.users.empty': placeholder('No users found.'),
+  'admin.users.table.user': placeholder('User'),
+  'admin.users.table.email': placeholder('Email'),
+  'admin.users.table.role': placeholder('Role'),
+  'admin.users.table.actions': placeholder('Actions'),
+  'admin.users.changeRolePlaceholder': placeholder('Change role'),
+  'admin.users.toast.roleUpdated.title': placeholder('Role Updated'),
+  'admin.users.toast.roleUpdated.description': placeholder('User role changed to'), // Role name appended
+  'admin.users.toast.error.fetch': placeholder('Could not fetch users.'),
+  'admin.users.toast.error.updateRole': placeholder('Could not update user role.'),
+  'admin.users.cannotChangeOwnRole': placeholder('You cannot change your own role.'),
+  'admin.users.permissionDeniedAssignSuperAdmin': placeholder('Only Super Admins can assign Super Admin role.'),
+  'admin.users.yourAccount': placeholder('Your Account'),
+
+  // Admin Events Page
+  'admin.events.pageTitle': placeholder('Manage Events'),
+  'admin.events.pageSubtitle': placeholder('Create, update, and manage church events.'),
+  'admin.events.addNew': placeholder('Add New Event'),
+  'admin.events.form.editTitle': placeholder('Edit Event'),
+  'admin.events.form.addTitle': placeholder('Add a New Event'),
+  'admin.events.empty.title': placeholder('No Events Found'),
+  'admin.events.empty.description': placeholder('Click "Add New Event" to get started.'),
+  'admin.events.delete.confirm.description': placeholder('This action cannot be undone. This will permanently delete the event'), // Event title appended
+  'admin.events.toast.deleted.title': placeholder('Event Deleted'),
+  'admin.events.toast.deleted.description': placeholder('has been removed.'), // Event title prepended
+  'admin.events.toast.error.fetch': placeholder('Could not fetch events.'),
+  'admin.events.toast.error.delete': placeholder('Could not delete event.'),
+
+  // EventForm Component
+  'eventForm.title.label': placeholder('Event Title'),
+  'eventForm.title.placeholder': placeholder('Sunday Service'),
+  'eventForm.description.label': placeholder('Description'),
+  'eventForm.description.placeholder': placeholder('Details about the event...'),
+  'eventForm.date.label': placeholder('Event Date'),
+  'eventForm.date.pick': placeholder('Pick a date'),
+  'eventForm.time.label': placeholder('Event Time (HH:MM)'),
+  'eventForm.location.label': placeholder('Location (Optional)'),
+  'eventForm.location.placeholder': placeholder('Church Main Hall'),
+  'eventForm.imageUrl.label': placeholder('Image URL (Optional)'),
+  'eventForm.imageUrl.placeholder': placeholder('https://example.com/event-image.jpg'),
+  'eventForm.imageUrl.description': placeholder('Link to an image for the event.'),
+  'eventForm.toast.updated.title': placeholder('Event Updated'),
+  'eventForm.toast.updated.description': placeholder('has been successfully updated.'), // Event title prepended
+  'eventForm.toast.added.title': placeholder('Event Added'),
+  'eventForm.toast.added.description': placeholder('has been successfully added.'), // Event title prepended
+  'eventForm.toast.failed.title': placeholder('Failed to Save Event'),
+  'eventForm.toast.failed.description': placeholder('Could not save the event. Please try again.'),
+  'eventForm.button.add': placeholder('Add Event'),
+  'eventForm.button.save': placeholder('Save Changes'),
+
+  // Admin Videos Page
+  'admin.videos.pageTitle': placeholder('Manage Videos'),
+  'admin.videos.pageSubtitle': placeholder('Add, edit, or remove videos from the gallery.'),
+  'admin.videos.addNew': placeholder('Add New Video'),
+  'admin.videos.form.editTitle': placeholder('Edit Video'),
+  'admin.videos.form.addTitle': placeholder('Add a New Video'),
+  'admin.videos.empty.title': placeholder('No Videos in Gallery'),
+  'admin.videos.empty.description': placeholder('Click "Add New Video" to get started.'),
+  'admin.videos.delete.confirm.description': placeholder('This action cannot be undone. This will permanently delete the video'), // Video title appended
+  'admin.videos.toast.deleted.title': placeholder('Video Deleted'),
+  'admin.videos.toast.deleted.description': placeholder('has been removed.'), // Video title prepended
+  'admin.videos.toast.error.fetch': placeholder('Could not fetch videos.'),
+  'admin.videos.toast.error.delete': placeholder('Could not delete video.'),
+  'admin.videos.card.url': placeholder('URL:'),
+  'admin.videos.card.category': placeholder('Category:'),
+
+
+  // VideoForm Component
+  'videoForm.title.label': placeholder('Video Title'),
+  'videoForm.title.placeholder': placeholder('Sermon on Faith'),
+  'videoForm.description.label': placeholder('Description (Optional)'),
+  'videoForm.description.placeholder': placeholder('A brief summary of the video...'),
+  'videoForm.videoUrl.label': placeholder('Video URL'),
+  'videoForm.videoUrl.placeholder': placeholder('https://youtube.com/watch?v=...'),
+  'videoForm.videoUrl.description': placeholder('Link to YouTube, Vimeo, or a direct video file (.mp4, .webm).'),
+  'videoForm.thumbnailUrl.label': placeholder('Thumbnail URL (Optional)'),
+  'videoForm.thumbnailUrl.placeholder': placeholder('https://example.com/thumbnail.jpg'),
+  'videoForm.thumbnailUrl.description': placeholder('Direct link to an image for the video thumbnail.'),
+  'videoForm.category.label': placeholder('Category (Optional)'),
+  'videoForm.category.placeholder': placeholder('e.g., Sermon, Event Highlight, Music'),
+  'videoForm.toast.updated.title': placeholder('Video Updated'),
+  'videoForm.toast.updated.description': placeholder('has been successfully updated.'), // Video title prepended
+  'videoForm.toast.added.title': placeholder('Video Added'),
+  'videoForm.toast.added.description': placeholder('has been successfully added.'), // Video title prepended
+  'videoForm.toast.failed.title': placeholder('Failed to Save Video'),
+  'videoForm.toast.failed.description': placeholder('Could not save the video. Please try again.'),
+  'videoForm.button.add': placeholder('Add Video'),
+  'videoForm.button.save': placeholder('Save Changes'),
+
+  // Admin Ceremonies Page
+  'admin.ceremonies.pageTitle': placeholder('Manage Ceremonies'),
+  'admin.ceremonies.pageSubtitle': placeholder('Record and manage details of church ceremonies.'),
+  'admin.ceremonies.addNew': placeholder('Add New Ceremony'),
+  'admin.ceremonies.form.editTitle': placeholder('Edit Ceremony'),
+  'admin.ceremonies.form.addTitle': placeholder('Add New Ceremony'),
+  'admin.ceremonies.empty.title': placeholder('No Ceremonies Recorded'),
+  'admin.ceremonies.empty.description': placeholder('Click "Add New Ceremony" to get started.'),
+  'admin.ceremonies.delete.confirm.description': placeholder('This action cannot be undone. This will permanently delete'), // Ceremony title appended
+  'admin.ceremonies.toast.deleted.title': placeholder('Ceremony Deleted'),
+  'admin.ceremonies.toast.deleted.description': placeholder('has been removed.'), // Ceremony title prepended
+  'admin.ceremonies.toast.error.fetch': placeholder('Could not fetch ceremonies.'),
+  'admin.ceremonies.toast.error.delete': placeholder('Could not delete ceremony.'),
+  'admin.ceremonies.card.videosCount': placeholder('video(s)'),
+
+  // CeremonyForm Component
+  'ceremonyForm.title.label': placeholder('Ceremony Title'),
+  'ceremonyForm.title.placeholder': placeholder("e.g., John & Jane's Wedding"),
+  'ceremonyForm.type.label': placeholder('Ceremony Type'),
+  'ceremonyForm.type.placeholder': placeholder('e.g., Wedding, Baptism, Confirmation'),
+  'ceremonyForm.description.label': placeholder('Description'),
+  'ceremonyForm.description.placeholder': placeholder('Details about the ceremony...'),
+  'ceremonyForm.date.label': placeholder('Ceremony Date'),
+  'ceremonyForm.date.pick': placeholder('Pick a date'),
+  'ceremonyForm.imageUrls.label': placeholder('Image URLs (Optional)'),
+  'ceremonyForm.imageUrls.placeholder': placeholder('https://example.com/image.jpg'),
+  'ceremonyForm.imageUrls.add': placeholder('Add Image URL'),
+  'ceremonyForm.videoUrls.label': placeholder('Video URLs (Optional)'),
+  'ceremonyForm.videoUrls.placeholder': placeholder('https://youtube.com/watch?v='),
+  'ceremonyForm.videoUrls.add': placeholder('Add Video URL'),
+  'ceremonyForm.toast.updated.title': placeholder('Ceremony Updated'),
+  'ceremonyForm.toast.updated.description': placeholder('has been successfully updated.'), // Ceremony title prepended
+  'ceremonyForm.toast.added.title': placeholder('Ceremony Added'),
+  'ceremonyForm.toast.added.description': placeholder('has been successfully added.'), // Ceremony title prepended
+  'ceremonyForm.toast.failed.title': placeholder('Failed to Save Ceremony'),
+  'ceremonyForm.button.add': placeholder('Add Ceremony'),
+  'ceremonyForm.button.save': placeholder('Save Changes'),
+
+  // Admin Choirs Page
+  'admin.choirs.pageTitle': placeholder('Manage Choirs'),
+  'admin.choirs.pageSubtitle': placeholder('Update general information about church choirs.'),
+  'admin.choirs.addNew': placeholder('Add New Choir'),
+  'admin.choirs.form.editTitle': placeholder('Edit Choir'),
+  'admin.choirs.form.addTitle': placeholder('Add New Choir'),
+  'admin.choirs.empty.title': placeholder('No Choirs Found'),
+  'admin.choirs.empty.description': placeholder('Click "Add New Choir" to get started.'),
+  'admin.choirs.delete.confirm.description': placeholder('This action cannot be undone. This will permanently delete the choir'), // Choir name appended
+  'admin.choirs.toast.deleted.title': placeholder('Choir Deleted'),
+  'admin.choirs.toast.deleted.description': placeholder('has been removed.'), // Choir name prepended
+  'admin.choirs.toast.error.fetch': placeholder('Could not fetch choirs.'),
+  'admin.choirs.toast.error.delete': placeholder('Could not delete choir.'),
+  'admin.choirs.card.adminUids': placeholder('Admin UIDs:'),
+  'admin.choirs.card.adminUidsNone': placeholder('None'),
+
+  // ChoirInfoForm Component
+  'choirInfoForm.name.label': placeholder('Choir Name'),
+  'choirInfoForm.name.placeholder': placeholder('Glorious Singers'),
+  'choirInfoForm.chamber.label': placeholder('Chamber'),
+  'choirInfoForm.chamber.placeholder': placeholder('Main Church / Youth / Sunday School'),
+  'choirInfoForm.description.label': placeholder('Description (Optional)'),
+  'choirInfoForm.description.placeholder': placeholder('About the choir...'),
+  'choirInfoForm.adminUids.label': placeholder('Choir Admin User IDs (Optional)'),
+  'choirInfoForm.adminUids.placeholder': placeholder('uid1, uid2, uid3'),
+  'choirInfoForm.adminUids.description': placeholder('Comma-separated list of User IDs for choir administrators.'),
+  'choirInfoForm.toast.updated.title': placeholder('Choir Info Updated'),
+  'choirInfoForm.toast.updated.description': placeholder('has been successfully updated.'), // Choir name prepended
+  'choirInfoForm.toast.added.title': placeholder('Choir Info Added'),
+  'choirInfoForm.toast.added.description': placeholder('has been successfully added.'), // Choir name prepended
+  'choirInfoForm.toast.failed.title': placeholder('Failed to Save Choir Info'),
+  'choirInfoForm.button.add': placeholder('Add Choir'),
+  'choirInfoForm.button.save': placeholder('Save Changes'),
+
+  // Admin Unions Page
+  'admin.unions.pageTitle': placeholder('Manage Unions'),
+  'admin.unions.pageSubtitle': placeholder('Update general information about church unions.'),
+  'admin.unions.addNew': placeholder('Add New Union'),
+  'admin.unions.form.editTitle': placeholder('Edit Union'),
+  'admin.unions.form.addTitle': placeholder('Add New Union'),
+  'admin.unions.empty.title': placeholder('No Unions Found'),
+  'admin.unions.empty.description': placeholder('Click "Add New Union" to get started.'),
+  'admin.unions.delete.confirm.description': placeholder('This action cannot be undone. This will permanently delete the union'), // Union name appended
+  'admin.unions.toast.deleted.title': placeholder('Union Deleted'),
+  'admin.unions.toast.deleted.description': placeholder('has been removed.'), // Union name prepended
+  'admin.unions.toast.error.fetch': placeholder('Could not fetch unions.'),
+  'admin.unions.toast.error.delete': placeholder('Could not delete union.'),
+
+  // UnionInfoForm Component
+  'unionInfoForm.name.label': placeholder('Union Name/Type'),
+  'unionInfoForm.name.selectPlaceholder': placeholder('Select a union type'),
+  'unionInfoForm.description.label': placeholder('Description (Optional)'),
+  'unionInfoForm.description.placeholder': placeholder('About the union...'),
+  'unionInfoForm.adminUids.label': placeholder('Union Admin User IDs (Optional)'),
+  'unionInfoForm.adminUids.placeholder': placeholder('uid1, uid2, uid3'),
+  'unionInfoForm.adminUids.description': placeholder('Comma-separated list of User IDs for union administrators.'),
+  'unionInfoForm.toast.updated.title': placeholder('Union Info Updated'),
+  'unionInfoForm.toast.updated.description': placeholder('has been successfully updated.'), // Union name prepended
+  'unionInfoForm.toast.added.title': placeholder('Union Info Added'),
+  'unionInfoForm.toast.added.description': placeholder('has been successfully added.'), // Union name prepended
+  'unionInfoForm.toast.failed.title': placeholder('Failed to Save Union Info'),
+  'unionInfoForm.button.add': placeholder('Add Union'),
+  'unionInfoForm.button.save': placeholder('Save Changes'),
+
+  // Dashboard Sub Pages (Placeholders for now)
+  'dashboard.activities.pageTitle': placeholder('Manage Activities'),
+  'dashboard.activities.pageSubtitle': placeholder('Oversee and manage church-related activities.'),
+  'dashboard.activities.cardTitle': placeholder('Activity Management'),
+  'dashboard.activities.description': placeholder('This section is for Pastors and Diacons to manage specific church activities they are responsible for. This might include smaller group meetings, pastoral care coordination, or specific ministry tasks. This could be integrated with the main events system or be a separate module.'),
+
+  'dashboard.choirAdmin.manage.pageTitle': placeholder('Manage My Choir'),
+  'dashboard.choirAdmin.manage.pageSubtitle': placeholder('Administer your choir members, events, and announcements.'),
+  'dashboard.choirAdmin.manage.cardTitle': placeholder('Choir Administration'),
+  'dashboard.choirAdmin.manage.description': placeholder("As a Choir Admin, you can manage your choir's members (approve requests, view list), schedule practices or choir-specific events, and post announcements for your choir."),
+
+  'dashboard.members.pageTitle': placeholder('View Members'),
+  'dashboard.members.pageSubtitle': placeholder('Access and view the list of church members.'),
+  'dashboard.members.cardTitle': placeholder('Church Member Directory'),
+  'dashboard.members.description': placeholder('This section will display a list of all church members. Functionality for searching, filtering, and viewing member details will be available.'),
+
+  'dashboard.settings.pageTitle': placeholder('Application Settings'),
+  'dashboard.settings.pageSubtitle': placeholder('Manage global settings for Rubavu Anglican Connect.'),
+  'dashboard.settings.cardTitle': placeholder('Global Configuration'),
+  'dashboard.settings.description': placeholder('This area is for Super Admins to manage application-wide settings. This could include:'),
+  'dashboard.settings.listItem1': placeholder('Site branding and appearance.'),
+  'dashboard.settings.listItem2': placeholder('Integration settings (e.g., email services).'),
+  'dashboard.settings.listItem3': placeholder('Default role assignments or secret code management.'),
+  'dashboard.settings.listItem4': placeholder('Feature flags or advanced configurations.'),
+
+  'dashboard.unionAdmin.manage.pageTitle': placeholder('Manage My Union'),
+  'dashboard.unionAdmin.manage.pageSubtitle': placeholder('Administer your union members, events, and communications.'),
+  'dashboard.unionAdmin.manage.cardTitle': placeholder('Union Administration'),
+  'dashboard.unionAdmin.manage.description': placeholder("As a Union Admin, you can manage your union's members (approve requests, view list), schedule meetings or union-specific events, and post announcements for your union."),
+
+  // Sidebar
+  'sidebar.menuTitle': placeholder('Dashboard Menu'),
+  'sidebar.overview': placeholder('Overview'),
+  'sidebar.myProfile': placeholder('My Profile'),
+  'sidebar.manageUsers': placeholder('Manage Users'),
+  'sidebar.manageEvents': placeholder('Manage Events'),
+  'sidebar.manageBooks': placeholder('Manage Books'),
+  'sidebar.manageVideos': placeholder('Manage Videos'),
+  'sidebar.manageCeremonies': placeholder('Manage Ceremonies'),
+  'sidebar.manageChoirsInfo': placeholder('Manage Choirs Info'),
+  'sidebar.manageUnionsInfo': placeholder('Manage Unions Info'),
+  'sidebar.viewMembers': placeholder('View Members'),
+  'sidebar.manageActivities': placeholder('Manage Activities'),
+  'sidebar.manageMyChoir': placeholder('Manage My Choir'),
+  'sidebar.manageMyUnion': placeholder('Manage My Union'),
+  'sidebar.appSettings': placeholder('App Settings'),
 
 };
 

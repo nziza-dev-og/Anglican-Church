@@ -13,10 +13,12 @@ import { BookOpen, Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -41,8 +43,8 @@ export default function BooksPage() {
   return (
     <AppLayout>
       <PageTitle
-        title="Digital Library"
-        subtitle="Explore our collection of Christian literature and resources."
+        title={t('books.title')}
+        subtitle={t('books.subtitle')}
       />
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -66,8 +68,8 @@ export default function BooksPage() {
       ) : books.length === 0 ? (
         <div className="text-center py-12">
           <BookOpen className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Books Available</h3>
-          <p className="text-muted-foreground">Our digital library is currently empty. Please check back soon.</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('books.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('books.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -85,18 +87,18 @@ export default function BooksPage() {
               <CardHeader className="pt-4 pb-2">
                 <CardTitle className="font-body text-lg text-primary line-clamp-2">{book.title}</CardTitle>
                 {book.author && (
-                  <CardDescription className="text-xs text-muted-foreground">By {book.author}</CardDescription>
+                  <CardDescription className="text-xs text-muted-foreground">{t('general.by')} {book.author}</CardDescription>
                 )}
               </CardHeader>
               <CardContent className="flex-grow pb-3">
                 <p className="text-sm text-foreground/80 line-clamp-3">
-                  {book.description || "No description available."}
+                  {book.description || t('general.noDescription')}
                 </p>
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full btn-animated" size="sm">
                   <Link href={book.downloadUrl} target="_blank" rel="noopener noreferrer">
-                    <Download className="mr-2 h-4 w-4" /> Download
+                    <Download className="mr-2 h-4 w-4" /> {t('general.download')}
                   </Link>
                 </Button>
               </CardFooter>

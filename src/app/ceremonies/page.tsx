@@ -13,10 +13,11 @@ import { CalendarDays, Camera, Church } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const formatDate = (timestamp: Timestamp | Date) => {
   const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-US', { // Consider making locale dynamic
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -26,6 +27,7 @@ const formatDate = (timestamp: Timestamp | Date) => {
 export default function CeremoniesPage() {
   const [ceremonies, setCeremonies] = useState<Ceremony[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchCeremonies = async () => {
@@ -50,8 +52,8 @@ export default function CeremoniesPage() {
   return (
     <AppLayout>
       <PageTitle
-        title="Church Ceremonies"
-        subtitle="Memories and details from our special church ceremonies and celebrations."
+        title={t('ceremonies.title')}
+        subtitle={t('ceremonies.subtitle')}
       />
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -72,8 +74,8 @@ export default function CeremoniesPage() {
       ) : ceremonies.length === 0 ? (
         <div className="text-center py-12">
           <Church className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Ceremonies Recorded</h3>
-          <p className="text-muted-foreground">Details about past ceremonies will be available here soon.</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('ceremonies.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('ceremonies.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -97,7 +99,7 @@ export default function CeremoniesPage() {
                )}
               <CardHeader className="pb-2">
                 <CardTitle className="font-headline text-xl text-primary">{ceremony.title}</CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">Type: {ceremony.type}</CardDescription>
+                <CardDescription className="text-sm text-muted-foreground">{t('ceremonies.card.type')} {ceremony.type}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow pb-3">
                  <div className="flex items-center text-sm text-muted-foreground mb-3">
@@ -105,13 +107,13 @@ export default function CeremoniesPage() {
                   {formatDate(ceremony.date)}
                 </div>
                 <p className="text-foreground/80 line-clamp-3">
-                  {ceremony.description || "No specific details provided."}
+                  {ceremony.description || t('ceremonies.card.noDetails')}
                 </p>
               </CardContent>
               {/* <CardFooter>
                  Potentially a link to a detailed ceremony page
                  <Button asChild variant="link" className="text-primary p-0 hover:text-accent">
-                  <Link href={`/ceremonies/${ceremony.id}`}>View Details &rarr;</Link>
+                  <Link href={`/ceremonies/${ceremony.id}`}>{t('general.viewDetails')}</Link>
                 </Button>
               </CardFooter> */}
             </Card>
@@ -121,4 +123,3 @@ export default function CeremoniesPage() {
     </AppLayout>
   );
 }
-

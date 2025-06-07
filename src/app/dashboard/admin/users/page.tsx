@@ -16,11 +16,13 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ALL_USER_ROLES_LIST } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AdminUsersPage() {
   const { userProfile: currentUserProfile, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -44,7 +46,7 @@ export default function AdminUsersPage() {
       setUsers(fetchedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
-      toast({ title: "Error", description: "Could not fetch users.", variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('admin.users.toast.error.fetch'), variant: "destructive" });
     } finally {
       setLoadingData(false);
     }
@@ -58,13 +60,12 @@ export default function AdminUsersPage() {
   
   const handleRoleChange = async (userId: string, newRole: UserProfile["role"]) => {
     if (currentUserProfile?.role !== USER_ROLES.SUPER_ADMIN && newRole === USER_ROLES.SUPER_ADMIN) {
-        toast({ title: "Permission Denied", description: "Only Super Admins can assign Super Admin role.", variant: "destructive" });
+        toast({ title: t('general.failure'), description: t('admin.users.permissionDeniedAssignSuperAdmin'), variant: "destructive" });
         return;
     }
     if (userId === currentUserProfile?.uid && newRole !== currentUserProfile?.role) {
-        toast({ title: "Action Denied", description: "You cannot change your own role.", variant: "destructive" });
-        // Re-fetch to revert optimistic UI or force reload select
-        setTimeout(fetchUsers, 100); // Re-fetch to revert select if needed
+        toast({ title: t('general.failure'), description: t('admin.users.cannotChangeOwnRole'), variant: "destructive" });
+        setTimeout(fetchUsers, 100); 
         return;
     }
 
@@ -72,11 +73,11 @@ export default function AdminUsersPage() {
       const userDocRef = doc(db, USERS_COLLECTION, userId);
       await updateDoc(userDocRef, { role: newRole });
       setUsers(prevUsers => prevUsers.map(u => u.uid === userId ? { ...u, role: newRole } : u));
-      toast({ title: "Role Updated", description: `User role changed to ${newRole}.` });
+      toast({ title: t('admin.users.toast.roleUpdated.title'), description: `${t('admin.users.toast.roleUpdated.description')} ${t(`userRoles.${newRole.toLowerCase().replace(/\s+/g, '')}`)}.` });
     } catch (error) {
       console.error("Error updating role:", error);
-      toast({ title: "Error", description: "Could not update user role.", variant: "destructive" });
-      setTimeout(fetchUsers, 100); // Re-fetch to revert select if needed
+      toast({ title: t('general.error.title'), description: t('admin.users.toast.error.updateRole'), variant: "destructive" });
+      setTimeout(fetchUsers, 100); 
     }
   };
 
@@ -89,7 +90,7 @@ export default function AdminUsersPage() {
   if (authLoading || (!currentUserProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="Manage Users" />
+        <PageTitle title={t('admin.users.pageTitle')} />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -98,27 +99,27 @@ export default function AdminUsersPage() {
   return (
     <div>
       <PageTitle
-        title="Manage Users"
-        subtitle="View and manage user roles within the application."
+        title={t('admin.users.pageTitle')}
+        subtitle={t('admin.users.pageSubtitle')}
       />
       <Card>
         <CardHeader>
-          <CardTitle>User List</CardTitle>
-          <CardDescription>Total Users: {users.length}</CardDescription>
+          <CardTitle>{t('admin.users.listTitle')}</CardTitle>
+          <CardDescription>{t('admin.users.total')} {users.length}</CardDescription>
         </CardHeader>
         <CardContent>
           {loadingData ? (
             <Skeleton className="h-64 w-full" />
           ) : users.length === 0 ? (
-            <p className="text-muted-foreground">No users found.</p>
+            <p className="text-muted-foreground">{t('admin.users.empty')}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('admin.users.table.user')}</TableHead>
+                  <TableHead>{t('admin.users.table.email')}</TableHead>
+                  <TableHead>{t('admin.users.table.role')}</TableHead>
+                  <TableHead className="text-right">{t('admin.users.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -130,24 +131,24 @@ export default function AdminUsersPage() {
                           <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
                           <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
                         </Avatar>
-                        <span className="font-medium">{user.displayName || 'N/A'}</span>
+                        <span className="font-medium">{user.displayName || t('general.notAvailableShort')}</span>
                       </div>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                         <Badge variant={user.role === USER_ROLES.SUPER_ADMIN ? "destructive" : "secondary"}>
-                            {user.role}
+                            {t(`userRoles.${user.role.toLowerCase().replace(/\s+/g, '')}`)}
                         </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {currentUserProfile?.uid !== user.uid ? ( // Prevent changing own role directly in select
+                      {currentUserProfile?.uid !== user.uid ? ( 
                          <Select
                             value={user.role}
                             onValueChange={(newRole) => handleRoleChange(user.uid, newRole as UserProfile["role"])}
-                            disabled={currentUserProfile?.role !== USER_ROLES.SUPER_ADMIN && user.role === USER_ROLES.SUPER_ADMIN} // Church admin cannot change super admin
+                            disabled={currentUserProfile?.role !== USER_ROLES.SUPER_ADMIN && user.role === USER_ROLES.SUPER_ADMIN}
                         >
                             <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Change role" />
+                                <SelectValue placeholder={t('admin.users.changeRolePlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                             {ALL_USER_ROLES_LIST.map(roleOption => (
@@ -156,13 +157,13 @@ export default function AdminUsersPage() {
                                     value={roleOption}
                                     disabled={currentUserProfile?.role !== USER_ROLES.SUPER_ADMIN && roleOption === USER_ROLES.SUPER_ADMIN}
                                 >
-                                {roleOption}
+                                {t(`userRoles.${roleOption.toLowerCase().replace(/\s+/g, '')}`)}
                                 </SelectItem>
                             ))}
                             </SelectContent>
                         </Select>
                       ) : (
-                        <span className="text-xs text-muted-foreground italic">Your Account</span>
+                        <span className="text-xs text-muted-foreground italic">{t('admin.users.yourAccount')}</span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -175,4 +176,3 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,24 +24,27 @@ import { auth, db } from "@/lib/firebase";
 import { DEFAULT_SECRET_CODES, USERS_COLLECTION, USER_ROLES } from "@/lib/constants";
 import type { UserProfile, UserRole } from "@/types";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-
-const formSchema = z.object({
-  displayName: z.string().min(2, { message: "Display name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  secretCode: z.string().optional(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function RegisterForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const formSchema = z.object({
+    displayName: z.string().min(2, { message: t('auth.displayName.errorMinLength') }),
+    email: z.string().email({ message: t('contact.form.email.error') }),
+    password: z.string().min(6, { message: t('auth.password.errorMinLength') }),
+    confirmPassword: z.string().min(6, { message: t('auth.password.errorMinLength') }),
+    secretCode: z.string().optional(),
+  }).refine(data => data.password === data.confirmPassword, {
+    message: t('auth.confirmPassword.errorMatch'),
+    path: ["confirmPassword"],
+  });
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,16 +82,16 @@ export default function RegisterForm() {
       };
       await setDoc(userDocRef, userProfileData);
 
-      toast({ title: "Registration Successful", description: "Your account has been created." });
+      toast({ title: t('auth.register.success.title'), description: t('auth.register.success.description') });
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Registration error", error);
-      let errorMessage = "An unexpected error occurred. Please try again.";
+      let errorMessage = t('general.error.unexpected');
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "This email is already registered. Please login or use a different email.";
+        errorMessage = t('auth.register.error.emailInUse');
       }
       toast({
-        title: "Registration Failed",
+        title: t('general.failure'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -104,9 +108,9 @@ export default function RegisterForm() {
           name="displayName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Display Name</FormLabel>
+              <FormLabel>{t('auth.displayName.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder={t('auth.displayName.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -117,9 +121,9 @@ export default function RegisterForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('auth.email.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input placeholder={t('auth.email.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -130,12 +134,12 @@ export default function RegisterForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('auth.password.label')}</FormLabel>
               <FormControl>
                  <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••" 
+                    placeholder={t('auth.password.placeholder')}
                     {...field} 
                   />
                   <Button
@@ -158,12 +162,12 @@ export default function RegisterForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>{t('auth.confirmPassword.label')}</FormLabel>
               <FormControl>
                  <div className="relative">
                   <Input 
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••" 
+                    placeholder={t('auth.password.placeholder')}
                     {...field} 
                   />
                   <Button
@@ -186,12 +190,12 @@ export default function RegisterForm() {
           name="secretCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Secret Code (Optional)</FormLabel>
+              <FormLabel>{t('auth.secretCode.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="Enter if you have a special role code" {...field} />
+                <Input placeholder={t('auth.secretCode.placeholder')} {...field} />
               </FormControl>
               <FormDescription>
-                For Church, Choir, or Union Admins.
+                {t('auth.secretCode.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -199,7 +203,7 @@ export default function RegisterForm() {
         />
         <Button type="submit" className="w-full btn-animated" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Register
+          {t('auth.register')}
         </Button>
       </form>
     </Form>

@@ -5,14 +5,16 @@ import PageTitle from "@/components/shared/PageTitle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function ProfilePage() {
   const { userProfile, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
 
   if (authLoading) {
     return (
       <div>
-        <PageTitle title="My Profile" />
+        <PageTitle title={t('dashboard.profile.pageTitle')} />
         <Card>
           <CardHeader><Skeleton className="h-8 w-48" /></CardHeader>
           <CardContent className="space-y-6">
@@ -28,17 +30,17 @@ export default function ProfilePage() {
   if (!userProfile) {
      return (
       <div>
-        <PageTitle title="My Profile" subtitle="Please log in to view your profile." />
+        <PageTitle title={t('dashboard.profile.pageTitle')} subtitle={t('dashboard.profile.notLoggedIn')} />
       </div>
     );
   }
 
   return (
     <div>
-      <PageTitle title="My Profile" subtitle="View and update your personal information." />
+      <PageTitle title={t('dashboard.profile.pageTitle')} subtitle={t('dashboard.profile.pageSubtitle')} />
       <Card className="max-w-2xl mx-auto card-animated">
         <CardHeader>
-          <CardTitle className="font-body">Edit Your Profile</CardTitle>
+          <CardTitle className="font-body">{t('dashboard.profile.form.editTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <UserProfileForm />

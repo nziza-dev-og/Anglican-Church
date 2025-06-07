@@ -26,12 +26,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/hooks/useTranslation";
 
 
 export default function AdminChoirsPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [choirs, setChoirs] = useState<Choir[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -57,7 +59,7 @@ export default function AdminChoirsPage() {
       setChoirs(fetchedChoirs);
     } catch (error) {
       console.error("Error fetching choirs:", error);
-      toast({ title: "Error", description: "Could not fetch choirs.", variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('admin.choirs.toast.error.fetch'), variant: "destructive" });
     } finally {
       setLoadingData(false);
     }
@@ -67,7 +69,7 @@ export default function AdminChoirsPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchChoirs();
     }
-  }, [userProfile]);
+  }, [userProfile, t, toast]); // Added t and toast
 
   const handleChoirSaved = (savedChoir: Choir) => {
     if (editingChoir) {
@@ -88,10 +90,10 @@ export default function AdminChoirsPage() {
     try {
       await deleteDoc(doc(db, CHOIRS_COLLECTION, choirId));
       setChoirs(prev => prev.filter(c => c.id !== choirId));
-      toast({ title: "Choir Deleted", description: `"${choirName}" has been removed.` });
+      toast({ title: t('admin.choirs.toast.deleted.title'), description: `"${choirName}" ${t('admin.choirs.toast.deleted.description')}` });
     } catch (error) {
       console.error("Error deleting choir:", error);
-      toast({ title: "Error", description: "Could not delete choir.", variant: "destructive"});
+      toast({ title: t('general.error.title'), description: t('admin.choirs.toast.error.delete'), variant: "destructive"});
     }
   };
   
@@ -103,20 +105,20 @@ export default function AdminChoirsPage() {
   };
 
   if (authLoading || (!userProfile && !authLoading)) {
-    return ( <div> <PageTitle title="Manage Choirs" /> <Skeleton className="h-12 w-32 mb-6" /> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-72 w-full" />)} </div> </div> );
+    return ( <div> <PageTitle title={t('admin.choirs.pageTitle')} /> <Skeleton className="h-12 w-32 mb-6" /> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-72 w-full" />)} </div> </div> );
   }
 
   return (
     <div>
       <PageTitle
-        title="Manage Choirs"
-        subtitle="Update general information about church choirs."
-        actions={ <Button onClick={toggleForm} className="btn-animated"> <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? "Cancel" : "Add New Choir"} </Button> }
+        title={t('admin.choirs.pageTitle')}
+        subtitle={t('admin.choirs.pageSubtitle')}
+        actions={ <Button onClick={toggleForm} className="btn-animated"> <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? t('general.cancel') : t('admin.choirs.addNew')} </Button> }
       />
 
       {showForm && (
         <Card className="mb-8 card-animated">
-          <CardHeader><CardTitle className="font-body">{editingChoir ? "Edit Choir" : "Add New Choir"}</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="font-body">{editingChoir ? t('admin.choirs.form.editTitle') : t('admin.choirs.form.addTitle')}</CardTitle></CardHeader>
           <CardContent><ChoirInfoForm onChoirSaved={handleChoirSaved} editingChoir={editingChoir} /></CardContent>
         </Card>
       )}
@@ -128,26 +130,26 @@ export default function AdminChoirsPage() {
           ))}
         </div>
       ) : choirs.length === 0 && !showForm ? (
-        <div className="text-center py-12"> <Music className="mx-auto h-16 w-16 text-muted-foreground mb-4" /> <h3 className="text-xl font-semibold text-foreground mb-2">No Choirs Found</h3> <p className="text-muted-foreground">Click "Add New Choir" to get started.</p> </div>
+        <div className="text-center py-12"> <Music className="mx-auto h-16 w-16 text-muted-foreground mb-4" /> <h3 className="text-xl font-semibold text-foreground mb-2">{t('admin.choirs.empty.title')}</h3> <p className="text-muted-foreground">{t('admin.choirs.empty.description')}</p> </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {choirs.map((choir) => (
             <Card key={choir.id} className="flex flex-col overflow-hidden shadow-lg rounded-lg bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="font-headline text-xl text-primary">{choir.name}</CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">Chamber: {choir.chamber}</CardDescription>
+                <CardDescription className="text-sm text-muted-foreground">{t('choirs.card.chamber')} {choir.chamber}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow pb-3 text-sm">
-                <p className="text-foreground/80 line-clamp-3 mb-2">{choir.description || "No description."}</p>
+                <p className="text-foreground/80 line-clamp-3 mb-2">{choir.description || t('general.noDescription')}</p>
                 <div className="flex items-center text-xs text-muted-foreground">
-                  <Users className="mr-1 h-4 w-4" /> Admin UIDs: {choir.adminUids.length > 0 ? choir.adminUids.map(uid => <Badge key={uid} variant="secondary" className="mr-1 text-xs">{uid.substring(0,6)}...</Badge>) : 'None'}
+                  <Users className="mr-1 h-4 w-4" /> {t('admin.choirs.card.adminUids')} {choir.adminUids.length > 0 ? choir.adminUids.map(uid => <Badge key={uid} variant="secondary" className="mr-1 text-xs">{uid.substring(0,6)}...</Badge>) : t('admin.choirs.card.adminUidsNone')}
                 </div>
               </CardContent>
               <CardFooter className="flex w-full space-x-2 !pt-2">
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditChoir(choir)}> <Edit className="mr-2 h-4 w-4" /> Edit </Button>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditChoir(choir)}> <Edit className="mr-2 h-4 w-4" /> {t('general.edit')} </Button>
                 <AlertDialog>
-                  <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="flex-1"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button></AlertDialogTrigger>
-                  <AlertDialogContent> <AlertDialogHeader> <AlertDialogTitle>Are you sure?</AlertDialogTitle> <AlertDialogDescription> This action cannot be undone. This will permanently delete the choir "{choir.name}". </AlertDialogDescription> </AlertDialogHeader> <AlertDialogFooter> <AlertDialogCancel>Cancel</AlertDialogCancel> <AlertDialogAction onClick={() => handleDeleteChoir(choir.id!, choir.name)}> Delete </AlertDialogAction> </AlertDialogFooter> </AlertDialogContent>
+                  <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="flex-1"><Trash2 className="mr-2 h-4 w-4" /> {t('general.delete')}</Button></AlertDialogTrigger>
+                  <AlertDialogContent> <AlertDialogHeader> <AlertDialogTitle>{t('general.confirmation.title')}</AlertDialogTitle> <AlertDialogDescription> {t('general.confirmation.cannotBeUndone')} {t('admin.choirs.delete.confirm.description')} "{choir.name}". </AlertDialogDescription> </AlertDialogHeader> <AlertDialogFooter> <AlertDialogCancel>{t('general.cancel')}</AlertDialogCancel> <AlertDialogAction onClick={() => handleDeleteChoir(choir.id!, choir.name)}> {t('general.delete')} </AlertDialogAction> </AlertDialogFooter> </AlertDialogContent>
                 </AlertDialog>
               </CardFooter>
             </Card>

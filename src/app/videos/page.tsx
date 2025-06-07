@@ -13,10 +13,12 @@ import { PlayCircle, VideoIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -41,8 +43,8 @@ export default function VideosPage() {
   return (
     <AppLayout>
       <PageTitle
-        title="Video Gallery"
-        subtitle="Watch sermons, event highlights, and other inspirational videos."
+        title={t('videos.title')}
+        subtitle={t('videos.subtitle')}
       />
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -65,8 +67,8 @@ export default function VideosPage() {
       ) : videos.length === 0 ? (
         <div className="text-center py-12">
           <VideoIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Videos Available</h3>
-          <p className="text-muted-foreground">Our video gallery is currently empty. Please check back soon.</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('videos.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('videos.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -89,13 +91,13 @@ export default function VideosPage() {
               </CardHeader>
               <CardContent className="flex-grow pb-3">
                 <CardDescription className="text-sm text-foreground/80 line-clamp-3">
-                  {video.description || "No description available."}
+                  {video.description || t('general.noDescription')}
                 </CardDescription>
               </CardContent>
                <CardFooter>
                 <Button asChild className="w-full btn-animated" variant="outline">
                   <Link href={video.videoUrl} target="_blank" rel="noopener noreferrer">
-                     Watch Video
+                     {t('videos.card.watch')}
                   </Link>
                 </Button>
               </CardFooter>
@@ -106,4 +108,3 @@ export default function VideosPage() {
     </AppLayout>
   );
 }
-

@@ -7,12 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 // TODO: Implement actual activity management.
 // For now, this is a placeholder page for Pastors/Diacons.
 
 export default function ManageActivitiesPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const authorizedRoles = [
     USER_ROLES.CHIEF_PASTOR,
@@ -29,7 +31,7 @@ export default function ManageActivitiesPage() {
   if (authLoading || (!userProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="Manage Activities" />
+        <PageTitle title={t('dashboard.activities.pageTitle')} />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -38,18 +40,16 @@ export default function ManageActivitiesPage() {
   return (
     <div>
       <PageTitle
-        title="Manage Activities"
-        subtitle="Oversee and manage church-related activities."
+        title={t('dashboard.activities.pageTitle')}
+        subtitle={t('dashboard.activities.pageSubtitle')}
       />
       <Card>
         <CardHeader>
-          <CardTitle>Activity Management</CardTitle>
+          <CardTitle>{t('dashboard.activities.cardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            This section is for Pastors and Diacons to manage specific church activities they are responsible for.
-            This might include smaller group meetings, pastoral care coordination, or specific ministry tasks.
-            This could be integrated with the main events system or be a separate module.
+            {t('dashboard.activities.description')}
           </p>
           {/* Placeholder for Activity Management tools */}
         </CardContent>

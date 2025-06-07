@@ -7,19 +7,21 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 // TODO: Implement actual member list view.
 // For now, this is a placeholder page for Pastors/Diacons/SuperAdmins.
 
 export default function ViewMembersPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const authorizedRoles = [
     USER_ROLES.CHIEF_PASTOR,
     USER_ROLES.PASTOR,
     USER_ROLES.DIACON,
-    USER_ROLES.SUPER_ADMIN, // Super admin can also view
-    USER_ROLES.CHURCH_ADMIN // Church admin might also need this
+    USER_ROLES.SUPER_ADMIN, 
+    USER_ROLES.CHURCH_ADMIN 
   ];
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function ViewMembersPage() {
   if (authLoading || (!userProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="View Members" />
+        <PageTitle title={t('dashboard.members.pageTitle')} />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -40,17 +42,16 @@ export default function ViewMembersPage() {
   return (
     <div>
       <PageTitle
-        title="View Members"
-        subtitle="Access and view the list of church members."
+        title={t('dashboard.members.pageTitle')}
+        subtitle={t('dashboard.members.pageSubtitle')}
       />
       <Card>
         <CardHeader>
-          <CardTitle>Church Member Directory</CardTitle>
+          <CardTitle>{t('dashboard.members.cardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            This section will display a list of all church members. Functionality for searching, filtering,
-            and viewing member details will be available.
+            {t('dashboard.members.description')}
           </p>
           {/* Placeholder for Member List Table/Cards */}
         </CardContent>

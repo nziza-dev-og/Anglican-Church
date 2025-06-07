@@ -7,12 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 // TODO: Implement actual union management (members, union-specific events).
 // For now, this is a placeholder page for Union Admins.
 
 export default function ManageUnionPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!authLoading && userProfile && userProfile.role !== USER_ROLES.UNION_ADMIN) {
@@ -23,7 +25,7 @@ export default function ManageUnionPage() {
   if (authLoading || (!userProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="Manage My Union" />
+        <PageTitle title={t('dashboard.unionAdmin.manage.pageTitle')} />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -32,17 +34,16 @@ export default function ManageUnionPage() {
   return (
     <div>
       <PageTitle
-        title="Manage My Union"
-        subtitle="Administer your union members, events, and communications."
+        title={t('dashboard.unionAdmin.manage.pageTitle')}
+        subtitle={t('dashboard.unionAdmin.manage.pageSubtitle')}
       />
       <Card>
         <CardHeader>
-          <CardTitle>Union Administration</CardTitle>
+          <CardTitle>{t('dashboard.unionAdmin.manage.cardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            As a Union Admin, you can manage your union's members (approve requests, view list),
-            schedule meetings or union-specific events, and post announcements for your union.
+            {t('dashboard.unionAdmin.manage.description')}
           </p>
           {/* Placeholder for Union Member Management, Union Event Form, etc. */}
         </CardContent>

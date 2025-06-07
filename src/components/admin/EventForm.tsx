@@ -27,17 +27,7 @@ import { db } from "@/lib/firebase";
 import { EVENTS_COLLECTION } from "@/lib/constants";
 import type { ChurchEvent } from "@/types";
 import { useState, useEffect } from "react";
-
-const eventFormSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
-  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
-  date: z.date({ required_error: "Event date is required." }),
-  time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Invalid time format (HH:MM)."}),
-  location: z.string().optional(),
-  imageUrl: z.string().url({ message: "Please enter a valid image URL." }).optional().or(z.literal('')),
-});
-
-type EventFormValues = z.infer<typeof eventFormSchema>;
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface EventFormProps {
   onEventSaved: (event: ChurchEvent) => void;
@@ -47,7 +37,19 @@ interface EventFormProps {
 export default function EventForm({ onEventSaved, editingEvent }: EventFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+
+  const eventFormSchema = z.object({
+    title: z.string().min(3, { message: t('bookForm.title.error') }), // Re-using a generic min length error
+    description: z.string().min(10, { message: t('contact.form.message.error') }), // Re-using
+    date: z.date({ required_error: t('eventForm.date.label') }), // Needs specific error message
+    time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: t('eventForm.time.label') }), // Needs specific error
+    location: z.string().optional(),
+    imageUrl: z.string().url({ message: t('contact.form.email.error') }).optional().or(z.literal('')), // Re-using
+  });
+  
+  type EventFormValues = z.infer<typeof eventFormSchema>;
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -86,7 +88,7 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
 
   async function onSubmit(data: EventFormValues) {
     if (!user) {
-      toast({ title: "Error", description: "You must be logged in.", variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('general.error.mustBeLoggedIn'), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -112,7 +114,7 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
           ...eventData,
           updatedAt: serverTimestamp(),
         });
-        toast({ title: "Event Updated", description: `"${data.title}" has been successfully updated.` });
+        toast({ title: t('eventForm.toast.updated.title'), description: `"${data.title}" ${t('eventForm.toast.updated.description')}` });
         onEventSaved({ ...editingEvent, ...eventData, date: eventTimestamp, updatedAt: new Date() } as ChurchEvent);
       } else {
         const docRef = await addDoc(collection(db, EVENTS_COLLECTION), {
@@ -120,13 +122,13 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
-        toast({ title: "Event Added", description: `"${data.title}" has been successfully added.` });
+        toast({ title: t('eventForm.toast.added.title'), description: `"${data.title}" ${t('eventForm.toast.added.description')}` });
         onEventSaved({ id: docRef.id, ...eventData, date: eventTimestamp, createdAt: new Date(), updatedAt: new Date() } as ChurchEvent);
       }
        form.reset({ date: new Date(), time: "10:00", title: "", description: "", location: "", imageUrl:"" });
     } catch (error) {
       console.error("Error saving event:", error);
-      toast({ title: "Failed to Save Event", description: "Could not save the event. Please try again.", variant: "destructive" });
+      toast({ title: t('eventForm.toast.failed.title'), description: t('eventForm.toast.failed.description'), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -140,9 +142,9 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Event Title</FormLabel>
+              <FormLabel>{t('eventForm.title.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="Sunday Service" {...field} />
+                <Input placeholder={t('eventForm.title.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,9 +155,9 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t('eventForm.description.label')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Details about the event..." {...field} />
+                <Textarea placeholder={t('eventForm.description.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -167,7 +169,7 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Event Date</FormLabel>
+                <FormLabel>{t('eventForm.date.label')}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -178,7 +180,7 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                        {field.value ? format(field.value, "PPP") : <span>{t('eventForm.date.pick')}</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -188,7 +190,7 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1))} // Disable past dates
+                      disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1))} 
                       initialFocus
                     />
                   </PopoverContent>
@@ -202,7 +204,7 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
             name="time"
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Event Time (HH:MM)</FormLabel>
+                    <FormLabel>{t('eventForm.time.label')}</FormLabel>
                     <FormControl>
                         <Input type="time" {...field} />
                     </FormControl>
@@ -216,9 +218,9 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location (Optional)</FormLabel>
+              <FormLabel>{t('eventForm.location.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="Church Main Hall" {...field} />
+                <Input placeholder={t('eventForm.location.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -229,18 +231,18 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL (Optional)</FormLabel>
+              <FormLabel>{t('eventForm.imageUrl.label')}</FormLabel>
               <FormControl>
-                <Input type="url" placeholder="https://example.com/event-image.jpg" {...field} />
+                <Input type="url" placeholder={t('eventForm.imageUrl.placeholder')} {...field} />
               </FormControl>
-              <FormDescription>Link to an image for the event.</FormDescription>
+              <FormDescription>{t('eventForm.imageUrl.description')}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" disabled={loading} className="w-full btn-animated">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {editingEvent ? "Save Changes" : "Add Event"}
+          {editingEvent ? t('eventForm.button.save') : t('eventForm.button.add')}
         </Button>
       </form>
     </Form>

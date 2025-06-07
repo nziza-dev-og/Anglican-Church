@@ -12,10 +12,12 @@ import { Music2, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function ChoirsPage() {
   const [choirs, setChoirs] = useState<Choir[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchChoirs = async () => {
@@ -40,8 +42,8 @@ export default function ChoirsPage() {
   return (
     <AppLayout>
       <PageTitle
-        title="Our Choirs"
-        subtitle="Discover the talented choirs of Rubavu Anglican Church."
+        title={t('choirs.title')}
+        subtitle={t('choirs.subtitle')}
       />
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -62,8 +64,8 @@ export default function ChoirsPage() {
       ) : choirs.length === 0 ? (
         <div className="text-center py-12">
           <Music2 className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Choirs Found</h3>
-          <p className="text-muted-foreground">Information about our choirs will be available soon.</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('choirs.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('choirs.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -75,23 +77,22 @@ export default function ChoirsPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="font-headline text-2xl text-primary">{choir.name}</CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Chamber: {choir.chamber || 'N/A'}
+                  {t('choirs.card.chamber')} {choir.chamber || t('general.notAvailableShort')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
                 <p className="text-foreground/80 line-clamp-4 mb-2">
-                  {choir.description || "No description available."}
+                  {choir.description || t('general.noDescription')}
                 </p>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Users className="mr-2 h-4 w-4" />
-                  {/* Placeholder for member count or admin info */}
-                  Led by dedicated administrators. 
+                  {t('choirs.card.ledBy')}
                 </div>
               </CardContent>
               {/* Add Link to choir details page if one exists in future */}
               {/* <CardFooter>
                 <Button asChild variant="link" className="text-primary p-0 hover:text-accent">
-                  <Link href={`/choirs/${choir.id}`}>Learn More &rarr;</Link>
+                  <Link href={`/choirs/${choir.id}`}>{t('general.learnMore')}</Link>
                 </Button>
               </CardFooter> */}
             </Card>

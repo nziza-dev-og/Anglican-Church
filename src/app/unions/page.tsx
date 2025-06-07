@@ -12,10 +12,12 @@ import { Handshake, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function UnionsPage() {
   const [unions, setUnions] = useState<ChurchUnion[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUnions = async () => {
@@ -40,8 +42,8 @@ export default function UnionsPage() {
   return (
     <AppLayout>
       <PageTitle
-        title="Church Unions"
-        subtitle="Learn about our Mothers Union, Fathers Union, and other fellowship groups."
+        title={t('unions.title')}
+        subtitle={t('unions.subtitle')}
       />
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -61,8 +63,8 @@ export default function UnionsPage() {
       ) : unions.length === 0 ? (
         <div className="text-center py-12">
           <Handshake className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Unions Found</h3>
-          <p className="text-muted-foreground">Information about our church unions will be available soon.</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('unions.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('unions.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -76,17 +78,16 @@ export default function UnionsPage() {
               </CardHeader>
               <CardContent className="flex-grow">
                 <p className="text-foreground/80 line-clamp-4 mb-2">
-                  {union.description || "No description available."}
+                  {union.description || t('general.noDescription')}
                 </p>
                  <div className="flex items-center text-sm text-muted-foreground">
                   <Users className="mr-2 h-4 w-4" />
-                  {/* Placeholder for member count or admin info */}
-                  Fostering fellowship and spiritual growth.
+                  {t('unions.card.fellowship')}
                 </div>
               </CardContent>
               {/* <CardFooter>
                 <Button asChild variant="link" className="text-primary p-0 hover:text-accent">
-                  <Link href={`/unions/${union.id}`}>Learn More &rarr;</Link>
+                  <Link href={`/unions/${union.id}`}>{t('general.learnMore')}</Link>
                 </Button>
               </CardFooter> */}
             </Card>

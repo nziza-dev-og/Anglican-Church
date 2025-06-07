@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,17 +20,20 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-
-const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-});
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const formSchema = z.object({
+    email: z.string().email({ message: t('contact.form.email.error') }),
+    password: z.string().min(6, { message: t('auth.password.errorMinLength') }),
+  });
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,16 +47,16 @@ export default function LoginForm() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push("/dashboard"); // Redirect to dashboard or home after login
+      toast({ title: t('auth.login.success.title'), description: t('auth.login.success.description') });
+      router.push("/dashboard"); 
     } catch (error: any) {
       console.error("Login error", error);
-      let errorMessage = "An unexpected error occurred. Please try again.";
+      let errorMessage = t('general.error.unexpected');
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid email or password. Please try again.";
+        errorMessage = t('auth.login.error.invalidCredentials');
       }
       toast({
-        title: "Login Failed",
+        title: t('general.failure'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -69,9 +73,9 @@ export default function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('auth.email.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input placeholder={t('auth.email.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,12 +86,12 @@ export default function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('auth.password.label')}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••" 
+                    placeholder={t('auth.password.placeholder')}
                     {...field} 
                   />
                   <Button
@@ -107,7 +111,7 @@ export default function LoginForm() {
         />
         <Button type="submit" className="w-full btn-animated" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Login
+          {t('auth.login')}
         </Button>
       </form>
     </Form>

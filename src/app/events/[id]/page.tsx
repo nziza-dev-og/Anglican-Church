@@ -13,10 +13,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const formatDate = (timestamp: Timestamp | Date) => {
   const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-US', { // Consider making locale dynamic
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -29,6 +30,7 @@ export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.id as string;
+  const { t } = useTranslation();
 
   const [event, setEvent] = useState<ChurchEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,18 +47,18 @@ export default function EventDetailPage() {
           if (docSnap.exists()) {
             setEvent({ id: docSnap.id, ...docSnap.data() } as ChurchEvent);
           } else {
-            setError("Event not found.");
+            setError(t('eventDetail.notFound'));
           }
         } catch (err) {
           console.error("Error fetching event:", err);
-          setError("Failed to load event details.");
+          setError(t('eventDetail.failToLoad'));
         } finally {
           setLoading(false);
         }
       };
       fetchEvent();
     }
-  }, [eventId]);
+  }, [eventId, t]);
 
   if (loading) {
     return (
@@ -79,9 +81,9 @@ export default function EventDetailPage() {
         <div className="max-w-4xl mx-auto text-center py-10">
             <Info className="mx-auto h-16 w-16 text-destructive mb-4" />
             <h2 className="text-2xl font-semibold text-destructive mb-2">{error}</h2>
-            <p className="text-muted-foreground mb-6">The event you are looking for might have been removed or the link is incorrect.</p>
+            <p className="text-muted-foreground mb-6">{t('eventDetail.notFound.description')}</p>
             <Button onClick={() => router.push('/events')} className="btn-animated">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Events
+                <ArrowLeft className="mr-2 h-4 w-4" /> {t('eventDetail.backButton')}
             </Button>
         </div>
       </AppLayout>
@@ -89,11 +91,10 @@ export default function EventDetailPage() {
   }
 
   if (!event) {
-    // This case should ideally be covered by error state, but as a fallback:
     return (
       <AppLayout>
         <div className="max-w-4xl mx-auto text-center py-10">
-          <p className="text-muted-foreground">Event details are unavailable.</p>
+          <p className="text-muted-foreground">{t('eventDetail.unavailable')}</p>
         </div>
       </AppLayout>
     );
@@ -103,7 +104,7 @@ export default function EventDetailPage() {
     <AppLayout>
       <div className="max-w-4xl mx-auto">
         <Button variant="outline" onClick={() => router.back()} className="mb-6 btn-animated">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Events
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t('general.back')}
         </Button>
 
         {event.imageUrl && (

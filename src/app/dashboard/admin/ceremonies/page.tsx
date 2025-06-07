@@ -9,7 +9,7 @@ import { db } from "@/lib/firebase";
 import type { Ceremony } from "@/types";
 import { collection, getDocs, query, orderBy, Timestamp, doc, deleteDoc } from "firebase/firestore";
 import { CalendarDays, PlusCircle, Trash2, Edit, ShieldCheck, Image as ImageIcon, Video } from "lucide-react";
-import Image from "next/image"; // Next.js Image
+import Image from "next/image"; 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,16 +27,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const formatDate = (timestamp: Timestamp | Date) => {
   const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); // Consider making locale dynamic
 };
 
 export default function AdminCeremoniesPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [ceremonies, setCeremonies] = useState<Ceremony[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -62,7 +64,7 @@ export default function AdminCeremoniesPage() {
       setCeremonies(fetchedCeremonies);
     } catch (error) {
       console.error("Error fetching ceremonies:", error);
-      toast({ title: "Error", description: "Could not fetch ceremonies.", variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('admin.ceremonies.toast.error.fetch'), variant: "destructive" });
     } finally {
       setLoadingData(false);
     }
@@ -72,7 +74,7 @@ export default function AdminCeremoniesPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchCeremonies();
     }
-  }, [userProfile]);
+  }, [userProfile, t, toast]); // Added t and toast
 
   const handleCeremonySaved = (savedCeremony: Ceremony) => {
     if (editingCeremony) {
@@ -93,10 +95,10 @@ export default function AdminCeremoniesPage() {
     try {
       await deleteDoc(doc(db, CEREMONIES_COLLECTION, ceremonyId));
       setCeremonies(prev => prev.filter(c => c.id !== ceremonyId));
-      toast({ title: "Ceremony Deleted", description: `"${ceremonyTitle}" has been removed.` });
+      toast({ title: t('admin.ceremonies.toast.deleted.title'), description: `"${ceremonyTitle}" ${t('admin.ceremonies.toast.deleted.description')}` });
     } catch (error) {
       console.error("Error deleting ceremony:", error);
-      toast({ title: "Error", description: "Could not delete ceremony.", variant: "destructive"});
+      toast({ title: t('general.error.title'), description: t('admin.ceremonies.toast.error.delete'), variant: "destructive"});
     }
   };
   
@@ -108,20 +110,20 @@ export default function AdminCeremoniesPage() {
   };
 
   if (authLoading || (!userProfile && !authLoading)) {
-    return ( <div> <PageTitle title="Manage Ceremonies" /> <Skeleton className="h-12 w-32 mb-6" /> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)} </div> </div> );
+    return ( <div> <PageTitle title={t('admin.ceremonies.pageTitle')} /> <Skeleton className="h-12 w-32 mb-6" /> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)} </div> </div> );
   }
 
   return (
     <div>
       <PageTitle
-        title="Manage Ceremonies"
-        subtitle="Record and manage details of church ceremonies."
-        actions={ <Button onClick={toggleForm} className="btn-animated"> <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? "Cancel" : "Add New Ceremony"} </Button> }
+        title={t('admin.ceremonies.pageTitle')}
+        subtitle={t('admin.ceremonies.pageSubtitle')}
+        actions={ <Button onClick={toggleForm} className="btn-animated"> <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? t('general.cancel') : t('admin.ceremonies.addNew')} </Button> }
       />
 
       {showForm && (
         <Card className="mb-8 card-animated">
-          <CardHeader><CardTitle className="font-body">{editingCeremony ? "Edit Ceremony" : "Add New Ceremony"}</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="font-body">{editingCeremony ? t('admin.ceremonies.form.editTitle') : t('admin.ceremonies.form.addTitle')}</CardTitle></CardHeader>
           <CardContent><CeremonyForm onCeremonySaved={handleCeremonySaved} editingCeremony={editingCeremony} /></CardContent>
         </Card>
       )}
@@ -133,7 +135,7 @@ export default function AdminCeremoniesPage() {
           ))}
         </div>
       ) : ceremonies.length === 0 && !showForm ? (
-        <div className="text-center py-12"> <ShieldCheck className="mx-auto h-16 w-16 text-muted-foreground mb-4" /> <h3 className="text-xl font-semibold text-foreground mb-2">No Ceremonies Recorded</h3> <p className="text-muted-foreground">Click "Add New Ceremony" to get started.</p> </div>
+        <div className="text-center py-12"> <ShieldCheck className="mx-auto h-16 w-16 text-muted-foreground mb-4" /> <h3 className="text-xl font-semibold text-foreground mb-2">{t('admin.ceremonies.empty.title')}</h3> <p className="text-muted-foreground">{t('admin.ceremonies.empty.description')}</p> </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {ceremonies.map((ceremony) => (
@@ -145,20 +147,20 @@ export default function AdminCeremoniesPage() {
               )}
               <CardHeader className="pb-2">
                 <CardTitle className="font-headline text-lg text-primary">{ceremony.title}</CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">Type: {ceremony.type}</CardDescription>
+                <CardDescription className="text-xs text-muted-foreground">{t('general.type')} {ceremony.type}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow pb-3 text-sm">
                 <div className="flex items-center text-muted-foreground mb-1"><CalendarDays className="mr-2 h-4 w-4" />{formatDate(ceremony.date)}</div>
-                <p className="text-foreground/80 line-clamp-2 mb-1">{ceremony.description || "No description."}</p>
+                <p className="text-foreground/80 line-clamp-2 mb-1">{ceremony.description || t('general.noDescription')}</p>
                 {ceremony.videoUrls && ceremony.videoUrls.length > 0 && (
-                  <div className="flex items-center text-xs text-muted-foreground"><Video className="mr-1 h-3 w-3" /> {ceremony.videoUrls.length} video(s)</div>
+                  <div className="flex items-center text-xs text-muted-foreground"><Video className="mr-1 h-3 w-3" /> {ceremony.videoUrls.length} {t('admin.ceremonies.card.videosCount')}</div>
                 )}
               </CardContent>
               <CardFooter className="flex w-full space-x-2 !pt-2">
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditCeremony(ceremony)}> <Edit className="mr-2 h-4 w-4" /> Edit </Button>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditCeremony(ceremony)}> <Edit className="mr-2 h-4 w-4" /> {t('general.edit')} </Button>
                 <AlertDialog>
-                  <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="flex-1"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button></AlertDialogTrigger>
-                  <AlertDialogContent> <AlertDialogHeader> <AlertDialogTitle>Are you sure?</AlertDialogTitle> <AlertDialogDescription> This action cannot be undone. This will permanently delete "{ceremony.title}". </AlertDialogDescription> </AlertDialogHeader> <AlertDialogFooter> <AlertDialogCancel>Cancel</AlertDialogCancel> <AlertDialogAction onClick={() => handleDeleteCeremony(ceremony.id!, ceremony.title)}> Delete </AlertDialogAction> </AlertDialogFooter> </AlertDialogContent>
+                  <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="flex-1"><Trash2 className="mr-2 h-4 w-4" /> {t('general.delete')}</Button></AlertDialogTrigger>
+                  <AlertDialogContent> <AlertDialogHeader> <AlertDialogTitle>{t('general.confirmation.title')}</AlertDialogTitle> <AlertDialogDescription> {t('general.confirmation.cannotBeUndone')} {t('admin.ceremonies.delete.confirm.description')} "{ceremony.title}". </AlertDialogDescription> </AlertDialogHeader> <AlertDialogFooter> <AlertDialogCancel>{t('general.cancel')}</AlertDialogCancel> <AlertDialogAction onClick={() => handleDeleteCeremony(ceremony.id!, ceremony.title)}> {t('general.delete')} </AlertDialogAction> </AlertDialogFooter> </AlertDialogContent>
                 </AlertDialog>
               </CardFooter>
             </Card>

@@ -24,9 +24,10 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const profileFormSchema = z.object({
-  displayName: z.string().min(2, { message: "Display name must be at least 2 characters." }),
+  displayName: z.string().min(2, { message: "Display name must be at least 2 characters." }), // Message will be translated by form context if needed, or keep generic
   interests: z.array(z.string()).optional(),
   photoFile: z.custom<FileList>((val) => val instanceof FileList, "Please upload a file").optional(),
 });
@@ -34,9 +35,10 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function UserProfileForm() {
-  const { userProfile, user, loading: authLoading } = useAuth(); // Added authLoading
+  const { userProfile, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false); // Renamed loading to isSubmitting
+  const { t } = useTranslation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPhotoURL, setCurrentPhotoURL] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function UserProfileForm() {
 
   async function onSubmit(data: ProfileFormValues) {
     if (!user) {
-      toast({ title: "Error", description: "You must be logged in to update your profile.", variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('general.error.mustBeLoggedIn'), variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -82,7 +84,6 @@ export default function UserProfileForm() {
         finalPhotoURL = await getDownloadURL(snapshot.ref);
         setCurrentPhotoURL(finalPhotoURL);
       } else {
-        // No new file uploaded, use existing photoURL from userProfile, defaulting to null if it's undefined
         finalPhotoURL = userProfile?.photoURL || null;
       }
 
@@ -90,20 +91,20 @@ export default function UserProfileForm() {
       await updateDoc(userDocRef, {
         displayName: data.displayName,
         interests: data.interests || [],
-        photoURL: finalPhotoURL, // This is now guaranteed to be string or null
+        photoURL: finalPhotoURL,
       });
 
-      toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
+      toast({ title: t('dashboard.profile.toast.updated.title'), description: t('dashboard.profile.toast.updated.description') });
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast({ title: "Update Failed", description: "Could not update your profile. Please try again.", variant: "destructive" });
+      toast({ title: t('dashboard.profile.toast.updateFailed.title'), description: t('dashboard.profile.toast.updateFailed.description'), variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   }
 
   if (authLoading && !userProfile) {
-    return <p>Loading profile...</p>; // Or a skeleton loader
+    return <p>{t('dashboard.profile.loading')}</p>;
   }
   
   return (
@@ -113,13 +114,11 @@ export default function UserProfileForm() {
             {currentPhotoURL ? (
                 <Image
                     src={currentPhotoURL}
-                    alt="Profile Picture"
+                    alt={t('dashboard.profile.form.photo.label')}
                     width={128}
                     height={128}
                     className="rounded-full object-cover h-32 w-32 border-2 border-primary shadow-md"
                     data-ai-hint="user profile"
-                    // Add unoptimized if using non-standard image hosts or SVGs
-                    // unoptimized={currentPhotoURL.startsWith('data:')}
                 />
             ) : (
               <div 
@@ -134,7 +133,7 @@ export default function UserProfileForm() {
               name="photoFile"
               render={({ field: { onChange, value, ...rest } }) => (
                 <FormItem>
-                  <FormLabel>Profile Picture</FormLabel>
+                  <FormLabel>{t('dashboard.profile.form.photo.label')}</FormLabel>
                   <FormControl>
                     <Input 
                       type="file" 
@@ -148,14 +147,13 @@ export default function UserProfileForm() {
                            };
                            reader.readAsDataURL(e.target.files[0]);
                         } else {
-                          // If file is cleared, revert to original or placeholder
                            setCurrentPhotoURL(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
                         }
                       }}
                       {...rest}
                     />
                   </FormControl>
-                  <FormDescription>Upload a new profile picture (optional).</FormDescription>
+                  <FormDescription>{t('dashboard.profile.form.photo.description')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -167,11 +165,11 @@ export default function UserProfileForm() {
           name="displayName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Display Name</FormLabel>
+              <FormLabel>{t('dashboard.profile.form.displayName.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="Your Name" {...field} />
+                <Input placeholder={t('auth.displayName.placeholder')} {...field} />
               </FormControl>
-              <FormDescription>This is your public display name.</FormDescription>
+              <FormDescription>{t('dashboard.profile.form.displayName.description')}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -182,20 +180,20 @@ export default function UserProfileForm() {
           name="interests"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Interests</FormLabel>
+              <FormLabel>{t('dashboard.profile.form.interests.label')}</FormLabel>
               <FormDescription>
-                List your interests to help us personalize your experience. Separate interests with a comma.
+                {t('dashboard.profile.form.interests.description')}
               </FormDescription>
               <FormControl>
                  <Textarea
-                    placeholder="E.g. Bible Study, Music, Community Service..."
+                    placeholder={t('dashboard.profile.form.interests.placeholder')}
                     className="h-24"
                     value={Array.isArray(field.value) ? field.value.join(", ") : ""}
                     onChange={(e) => field.onChange(e.target.value.split(",").map(s => s.trim()).filter(Boolean))}
                   />
               </FormControl>
                <FormDescription>
-                 Example: Music, Bible Study, Youth Ministry
+                 {t('dashboard.profile.form.interests.example')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -204,7 +202,7 @@ export default function UserProfileForm() {
         
         <Button type="submit" disabled={isSubmitting} className="btn-animated">
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Update Profile
+          {t('dashboard.profile.form.button.update')}
         </Button>
       </form>
     </Form>

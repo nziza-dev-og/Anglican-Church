@@ -7,12 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 // TODO: Implement actual application settings.
 // For now, this is a placeholder page for Super Admins.
 
 export default function AppSettingsPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!authLoading && userProfile && userProfile.role !== USER_ROLES.SUPER_ADMIN) {
@@ -23,7 +25,7 @@ export default function AppSettingsPage() {
   if (authLoading || (!userProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="Application Settings" />
+        <PageTitle title={t('dashboard.settings.pageTitle')} />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -32,22 +34,22 @@ export default function AppSettingsPage() {
   return (
     <div>
       <PageTitle
-        title="Application Settings"
-        subtitle="Manage global settings for Rubavu Anglican Connect."
+        title={t('dashboard.settings.pageTitle')}
+        subtitle={t('dashboard.settings.pageSubtitle')}
       />
       <Card>
         <CardHeader>
-          <CardTitle>Global Configuration</CardTitle>
+          <CardTitle>{t('dashboard.settings.cardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            This area is for Super Admins to manage application-wide settings. This could include:
+            {t('dashboard.settings.description')}
           </p>
           <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-2">
-            <li>Site branding and appearance.</li>
-            <li>Integration settings (e.g., email services).</li>
-            <li>Default role assignments or secret code management.</li>
-            <li>Feature flags or advanced configurations.</li>
+            <li>{t('dashboard.settings.listItem1')}</li>
+            <li>{t('dashboard.settings.listItem2')}</li>
+            <li>{t('dashboard.settings.listItem3')}</li>
+            <li>{t('dashboard.settings.listItem4')}</li>
           </ul>
           {/* Placeholder for actual settings controls */}
         </CardContent>
