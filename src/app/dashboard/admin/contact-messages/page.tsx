@@ -12,10 +12,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button"; // Added buttonVariants import
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Added ScrollArea import
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Eye, Mail, Trash2, CheckCircle, XCircle, Loader2, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -183,11 +183,11 @@ export default function AdminContactMessagesPage() {
                           </Button>
                         </AlertDialogTrigger>
                         {selectedMessage && selectedMessage.id === msg.id && (
-                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>{t('admin.contactMessages.delete.confirm.title')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              {t('admin.contactMessages.delete.confirm.description')} "{msg.subject}" {t('general.by').toLowerCase()} {msg.name}? {t('general.confirmation.cannotBeUndone')}
+                              {t('general.confirmation.cannotBeUndone')} {t('admin.contactMessages.delete.confirm.description')} "{msg.subject}" {t('general.by').toLowerCase()} {msg.name}?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
