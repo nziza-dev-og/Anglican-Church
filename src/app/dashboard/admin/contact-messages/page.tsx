@@ -12,9 +12,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button"; // Added buttonVariants import
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area"; // Added ScrollArea import
 import { Eye, Mail, Trash2, CheckCircle, XCircle, Loader2, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -70,7 +71,7 @@ export default function AdminContactMessagesPage() {
       const messageDocRef = doc(db, CONTACT_MESSAGES_COLLECTION, message.id);
       await updateDoc(messageDocRef, { isRead: !message.isRead });
       setMessages(prevMessages => prevMessages.map(msg => 
-        msg.id === message.id ? { ...msg, isRead: !msg.isRead } : msg
+        msg.id === message.id ? { ...msg, isRead: !message.isRead } : msg
       ));
       toast({ title: t('general.success'), description: message.isRead ? t('admin.contactMessages.toast.markedUnread') : t('admin.contactMessages.toast.markedRead') });
     } catch (error) {
@@ -98,6 +99,10 @@ export default function AdminContactMessagesPage() {
   const handleViewMessage = (message: ContactMessage) => {
     setSelectedMessage(message);
     setIsViewDialogOpen(true);
+    // Mark as read when viewed, if not already
+    if (!message.isRead && message.id) {
+        handleToggleReadStatus({...message, isRead: false}); // Pass as if it's unread to toggle it to read
+    }
   };
 
   const formatDate = (timestamp: Timestamp | Date | undefined) => {
@@ -151,7 +156,7 @@ export default function AdminContactMessagesPage() {
               </TableHeader>
               <TableBody>
                 {messages.map((msg) => (
-                  <TableRow key={msg.id} className={!msg.isRead ? 'font-semibold bg-secondary/20' : ''}>
+                  <TableRow key={msg.id} className={!msg.isRead ? 'font-semibold bg-secondary/20 hover:bg-secondary/30' : 'hover:bg-muted/50'} onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>
                     <TableCell>{msg.name}</TableCell>
                     <TableCell className="hidden md:table-cell">{msg.email}</TableCell>
                     <TableCell className="max-w-xs truncate">{msg.subject}</TableCell>
@@ -162,24 +167,23 @@ export default function AdminContactMessagesPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-1">
-                      <Button variant="ghost" size="icon" onClick={() => handleViewMessage(msg)} title={t('admin.contactMessages.actions.view')}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleToggleReadStatus(msg)} title={msg.isRead ? t('admin.contactMessages.actions.markAsUnread') : t('admin.contactMessages.actions.markAsRead')} disabled={actionLoading === `read-${msg.id}`}>
+                      {/* View button removed as row click handles view */}
+                      <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleToggleReadStatus(msg);}} title={msg.isRead ? t('admin.contactMessages.actions.markAsUnread') : t('admin.contactMessages.actions.markAsRead')} disabled={actionLoading === `read-${msg.id}`}>
                         {actionLoading === `read-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : msg.isRead ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                       </Button>
-                       <Button asChild variant="ghost" size="icon" title={t('admin.contactMessages.actions.reply')}>
+                       <Button asChild variant="ghost" size="icon" title={t('admin.contactMessages.actions.reply')} onClick={(e) => e.stopPropagation()}>
                         <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`}>
                           <Mail className="h-4 w-4" />
                         </a>
                       </Button>
-                      <AlertDialog>
+                      <AlertDialog onOpenChange={(open) => { if(!open) setSelectedMessage(null);}}>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" title={t('admin.contactMessages.actions.delete')} disabled={actionLoading === `delete-${msg.id}`}>
+                          <Button variant="ghost" size="icon" title={t('admin.contactMessages.actions.delete')} disabled={actionLoading === `delete-${msg.id}`} onClick={(e) => {e.stopPropagation(); setSelectedMessage(msg); /* Trigger will open the dialog */}}>
                              {actionLoading === `delete-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4 text-destructive" />}
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        {selectedMessage && selectedMessage.id === msg.id && (
+                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                           <AlertDialogHeader>
                             <AlertDialogTitle>{t('admin.contactMessages.delete.confirm.title')}</AlertDialogTitle>
                             <AlertDialogDescription>
@@ -193,6 +197,7 @@ export default function AdminContactMessagesPage() {
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
+                        )}
                       </AlertDialog>
                     </TableCell>
                   </TableRow>
@@ -204,7 +209,7 @@ export default function AdminContactMessagesPage() {
       </Card>
 
       {selectedMessage && (
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <Dialog open={isViewDialogOpen} onOpenChange={(open) => {setIsViewDialogOpen(open); if (!open) setSelectedMessage(null);}}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{t('admin.contactMessages.viewMessage.title')}: {selectedMessage.subject}</DialogTitle>
@@ -221,7 +226,7 @@ export default function AdminContactMessagesPage() {
                   <Mail className="mr-2 h-4 w-4" /> {t('admin.contactMessages.actions.reply')}
                 </a>
               </Button>
-              <Button type="button" variant="secondary" onClick={() => setIsViewDialogOpen(false)}>
+              <Button type="button" variant="secondary" onClick={() => {setIsViewDialogOpen(false); setSelectedMessage(null);}}>
                 {t('general.cancel')}
               </Button>
             </DialogFooter>
