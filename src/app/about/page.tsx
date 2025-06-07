@@ -44,7 +44,7 @@ export default function AboutPage() {
           </div>
           <div className="relative h-80 rounded-lg overflow-hidden shadow-lg">
             <Image
-              src="https://placehold.co/600x400.png"
+              src="https://i.pinimg.com/736x/74/ef/e4/74efe4d77ca70833ffdb4cbb5d1dbe8f.jpg"
               alt={t('about.history.title')}
               layout="fill"
               objectFit="cover"

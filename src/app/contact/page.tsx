@@ -182,7 +182,7 @@ const ContactPage = () => {
             <CardContent>
                <div className="relative h-64 md:h-80 rounded-lg overflow-hidden shadow-md">
                 <Image
-                  src="https://placehold.co/600x400.png"
+                  src="https://i.pinimg.com/736x/6e/89/81/6e89819f318a3027d9d4ecf4a3630c6a.jpg"
                   alt={t('contact.findUs.title')}
                   layout="fill"
                   objectFit="cover"

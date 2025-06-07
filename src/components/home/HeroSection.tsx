@@ -11,7 +11,7 @@ export default function HeroSection() {
     <section className="relative bg-gradient-to-r from-primary/80 to-secondary/60 text-primary-foreground py-20 md:py-32 rounded-lg shadow-xl overflow-hidden">
       <div className="absolute inset-0">
         <Image
-          src="https://placehold.co/1200x600.png"
+          src="https://i.pinimg.com/736x/f1/d8/90/f1d89077b78893182275f50ce562da4e.jpg"
           alt={t('appName')} // Using appName as a general alt text for background
           layout="fill"
           objectFit="cover"
