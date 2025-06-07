@@ -35,13 +35,13 @@ export default function AdminBooksPage() {
 
   const [books, setBooks] = useState<Book[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  // const [editingBook, setEditingBook] = useState<Book | null>(null); // For future edit functionality
+  const [showForm, setShowForm] = useState(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
 
   useEffect(() => {
     if (!authLoading && userProfile && 
         (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
-      router.push("/dashboard"); // Redirect if not authorized
+      router.push("/dashboard"); 
     }
   }, [userProfile, authLoading, router]);
 
@@ -69,9 +69,26 @@ export default function AdminBooksPage() {
     }
   }, [userProfile]);
 
-  const handleBookAdded = (newBook: Book) => {
-    setBooks(prevBooks => [newBook, ...prevBooks]);
-    setShowAddForm(false);
+  const handleBookSaved = (savedBook: Book) => {
+    if (editingBook) {
+      setBooks(prevBooks => prevBooks.map(b => b.id === savedBook.id ? savedBook : b));
+    } else {
+      setBooks(prevBooks => [savedBook, ...prevBooks]);
+    }
+    setShowForm(false);
+    setEditingBook(null);
+  };
+
+  const handleEditBook = (book: Book) => {
+    setEditingBook(book);
+    setShowForm(true);
+  };
+  
+  const toggleForm = () => {
+    setShowForm(!showForm);
+    if (showForm) { // If form was open and is now closing
+      setEditingBook(null); // Reset editing state
+    }
   };
 
   const handleDeleteBook = async (bookId: string, bookTitle: string) => {
@@ -103,19 +120,19 @@ export default function AdminBooksPage() {
         title="Manage Books"
         subtitle="Add, edit, or remove books from the digital library."
         actions={
-          <Button onClick={() => setShowAddForm(!showAddForm)} className="btn-animated">
-            <PlusCircle className="mr-2 h-5 w-5" /> {showAddForm ? "Cancel" : "Add New Book"}
+          <Button onClick={toggleForm} className="btn-animated">
+            <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? "Cancel" : "Add New Book"}
           </Button>
         }
       />
 
-      {showAddForm && (
+      {showForm && (
         <Card className="mb-8 card-animated">
           <CardHeader>
-            <CardTitle className="font-body">Add a New Book</CardTitle>
+            <CardTitle className="font-body">{editingBook ? "Edit Book" : "Add a New Book"}</CardTitle>
           </CardHeader>
           <CardContent>
-            <BookForm onBookAdded={handleBookAdded} />
+            <BookForm onBookAdded={handleBookSaved} editingBook={editingBook} />
           </CardContent>
         </Card>
       )}
@@ -126,7 +143,7 @@ export default function AdminBooksPage() {
             <Card key={i} className="overflow-hidden"><Skeleton className="aspect-[3/4] w-full" /></Card>
           ))}
         </div>
-      ) : books.length === 0 && !showAddForm ? (
+      ) : books.length === 0 && !showForm ? (
         <div className="text-center py-12">
           <BookOpen className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-foreground mb-2">No Books in Library</h3>
@@ -161,9 +178,9 @@ export default function AdminBooksPage() {
                   </Link>
                 </Button>
                 <div className="flex w-full space-x-2">
-                  {/* <Button variant="outline" size="sm" className="flex-1" onClick={() => {}}>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditBook(book)}>
                     <Edit className="mr-2 h-4 w-4" /> Edit
-                  </Button> */}
+                  </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" size="sm" className="flex-1">

@@ -1,3 +1,4 @@
+
 import type { Timestamp } from "firebase/firestore";
 
 export type UserRole =
@@ -28,9 +29,10 @@ export interface ChurchEvent {
   description: string;
   date: Timestamp;
   location?: string;
-  imageUrl?: string;
+  imageUrl?: string; // Optional direct image URL
   createdBy: string; // UID
   createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface Book {
@@ -38,50 +40,56 @@ export interface Book {
   title: string;
   author?: string;
   description?: string;
-  downloadUrl: string;
-  coverImageUrl?: string;
+  downloadUrl: string; // Final URL (from upload or direct input)
+  coverImageUrl?: string; // Final URL (from upload or direct input)
   category?: string;
   uploadedBy: string; // UID
   uploadedAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface Video {
   id?: string;
   title: string;
   description?: string;
-  videoUrl: string;
-  thumbnailUrl?: string;
+  videoUrl: string; // YouTube, Vimeo, or direct .mp4 URL
+  thumbnailUrl?: string; // Optional direct thumbnail URL
   category?: string;
   uploadedBy: string; // UID
   uploadedAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface Choir {
   id?: string;
   name: string;
-  chamber: string;
+  chamber: string; // e.g., Main, Youth, Children
   description?: string;
-  adminUids: string[];
+  adminUids: string[]; // Array of user UIDs who can administer this choir
+  createdBy: string; // UID of Church/Super Admin
   createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface ChoirMember {
   id?: string; // choirId_userId
   userId: string;
   choirId: string;
-  roleInChoir: string;
+  roleInChoir: string; // e.g., Singer, Instrumentalist
   joinDate: Timestamp;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected'; // Managed by Choir Admin
 }
 
-export type UnionType = 'Mothers Union' | 'Fathers Union';
+export type UnionType = 'Mothers Union' | 'Fathers Union' | 'Youth Union' | 'Other'; // Added Youth and Other
 
 export interface ChurchUnion {
   id?: string;
   name: UnionType;
   description?: string;
-  adminUids: string[];
+  adminUids: string[]; // Array of user UIDs who can administer this union
+  createdBy: string; // UID of Church/Super Admin
   createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface UnionMember {
@@ -89,24 +97,25 @@ export interface UnionMember {
   userId: string;
   unionId: string;
   joinDate: Timestamp;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected'; // Managed by Union Admin
 }
 
 export interface Ceremony {
   id?: string;
-  type: string;
+  type: string; // e.g., Baptism, Wedding, Confirmation, Funeral
   title: string;
   date: Timestamp;
   description?: string;
-  imageUrls?: string[];
-  videoUrls?: string[];
+  imageUrls?: string[]; // Array of direct image URLs
+  videoUrls?: string[]; // Array of direct video URLs (e.g., YouTube links)
   createdBy: string; // UID
   createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface ChatMessage {
   id?: string;
-  roomId: string;
+  roomId: string; // Can be event ID, choir ID, union ID, or 'general'
   senderUid: string;
   senderName: string;
   senderPhotoURL?: string | null;
@@ -119,4 +128,8 @@ export interface SecretCode {
   code: string;
 }
 
-// For personalized
+export interface Recommendation {
+  title: string;
+  description: string;
+  link: string;
+}
