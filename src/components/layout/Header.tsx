@@ -3,7 +3,24 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, UserCircle, Settings, LayoutDashboard, Menu, Globe } from 'lucide-react';
+import {
+  LogOut,
+  UserCircle,
+  Settings,
+  LayoutDashboard,
+  Menu,
+  Globe,
+  Home,
+  Info,
+  CalendarDays,
+  BookOpen,
+  Users, // For Choirs/Unions if specific icons are too many
+  Music,
+  Handshake,
+  Video,
+  ShieldCheck,
+  Mails, // For Contact
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -23,7 +40,13 @@ import { SidebarNav } from './SidebarNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Locale } from '@/lib/translations';
+import type { ReactNode } from 'react';
 
+interface NavLink {
+  labelKey: string;
+  href: string;
+  icon?: ReactNode;
+}
 
 export default function Header() {
   const { user, userProfile, logout } = useAuth();
@@ -32,16 +55,16 @@ export default function Header() {
   const { currentLocale, setCurrentLocale, availableLocales } = useLanguage();
   const { t } = useTranslation();
 
-  const NAV_ITEMS = [
-    { labelKey: 'nav.home', href: '/' },
-    { labelKey: 'nav.about', href: '/about' },
-    { labelKey: 'nav.events', href: '/events' },
-    { labelKey: 'nav.books', href: '/books' },
-    { labelKey: 'nav.choirs', href: '/choirs' },
-    { labelKey: 'nav.unions', href: '/unions' },
-    { labelKey: 'nav.videos', href: '/videos' },
-    { labelKey: 'nav.ceremonies', href: '/ceremonies' },
-    { labelKey: 'nav.contact', href: '/contact' },
+  const NAV_ITEMS: NavLink[] = [
+    { labelKey: 'nav.home', href: '/', icon: <Home /> },
+    { labelKey: 'nav.about', href: '/about', icon: <Info /> },
+    { labelKey: 'nav.events', href: '/events', icon: <CalendarDays /> },
+    { labelKey: 'nav.books', href: '/books', icon: <BookOpen /> },
+    { labelKey: 'nav.choirs', href: '/choirs', icon: <Music /> },
+    { labelKey: 'nav.unions', href: '/unions', icon: <Handshake /> },
+    { labelKey: 'nav.videos', href: '/videos', icon: <Video /> },
+    { labelKey: 'nav.ceremonies', href: '/ceremonies', icon: <ShieldCheck /> },
+    { labelKey: 'nav.contact', href: '/contact', icon: <Mails /> },
   ];
   
   const getInitials = (name?: string | null) => {
@@ -57,18 +80,17 @@ export default function Header() {
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="mr-2 md:hidden">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle Menu</span>
+                <span className="sr-only">{t('sidebar.menuTitle')}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
-              <SheetHeader className="p-4 border-b border-sidebar-border flex flex-col items-start">
-                <Logo textSize="text-2xl" className="mb-2"/>
-                <SheetTitle className="text-lg font-semibold text-sidebar-foreground self-start">
-                  {t('sidebar.menuTitle')}
-                </SheetTitle>
+               <SheetHeader className="p-4 border-b border-sidebar-border flex flex-row items-center justify-between">
+                <Logo textSize="text-2xl"/>
+                {/* SheetClose is automatically added by SheetContent, explicit title is good for accessibility */}
+                <SheetTitle className="sr-only">{t('sidebar.menuTitle')}</SheetTitle> 
               </SheetHeader>
               <SidebarNav 
-                items={NAV_ITEMS.map(item => ({ ...item, label: t(item.labelKey) }))} 
+                items={NAV_ITEMS.map(item => ({ ...item, label: t(item.labelKey), icon: item.icon }))} 
                 isMobile={true} 
                 onLinkClick={() => setMobileNavOpen(false)}
               />
@@ -169,4 +191,3 @@ export default function Header() {
     </header>
   );
 }
-
