@@ -25,55 +25,52 @@ import { BOOKS_COLLECTION } from "@/lib/constants";
 import type { Book } from "@/types";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
-const bookFormSchemaBase = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
-  author: z.string().optional(),
-  description: z.string().optional(),
-  category: z.string().optional(),
-  bookInputMethod: z.enum(["upload", "url"]),
-  bookFile: z.custom<FileList>().optional(),
-  bookUrl: z.string().url().optional(),
-  coverInputMethod: z.enum(["upload", "url"]),
-  coverImageFile: z.custom<FileList>().optional(),
-  coverImageUrlInput: z.string().url().optional(),
-});
+const BookForm = ({ onBookAdded, editingBook }: { onBookAdded: (book: Book) => void; editingBook?: Book | null; }) => {
+  const { t } = useTranslation();
 
-const bookFormSchema = bookFormSchemaBase
-  .refine(
-    (data) => {
-      if (data.bookInputMethod === "upload") return data.bookFile && data.bookFile.length > 0;
-      if (data.bookInputMethod === "url") return !!data.bookUrl;
-      return false;
-    },
-    {
-      message: "Book file or URL is required based on selection.",
-      path: ["bookFile"], // Or bookUrl, depends on context
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.coverInputMethod === "upload" && data.coverImageFile && data.coverImageFile.length > 0) return true;
-      if (data.coverInputMethod === "url" && !!data.coverImageUrlInput) return true;
-      if (data.coverInputMethod === "upload" && (!data.coverImageFile || data.coverImageFile.length === 0) && !data.coverImageUrlInput) return true; // Optional cover
-      if (data.coverInputMethod === "url" && !data.coverImageUrlInput && (!data.coverImageFile || data.coverImageFile.length === 0)) return true; // Optional cover
-      return false;
-    },
-    {
-      message: "Cover image file or URL is required if method is selected, or clear selection if no cover.",
-      path: ["coverImageFile"], // Or coverImageUrlInput
-    }
-  );
+  const bookFormSchemaBase = z.object({
+    title: z.string().min(3, { message: t('bookForm.title.error') }),
+    author: z.string().optional(),
+    description: z.string().optional(),
+    category: z.string().optional(),
+    bookInputMethod: z.enum(["upload", "url"]),
+    bookFile: z.custom<FileList>().optional(),
+    bookUrl: z.string().url({ message: t('contact.form.email.error') /* Re-use generic URL error or add specific */ }).optional(), // Using email error as placeholder
+    coverInputMethod: z.enum(["upload", "url"]),
+    coverImageFile: z.custom<FileList>().optional(),
+    coverImageUrlInput: z.string().url({ message: t('contact.form.email.error') /* Re-use generic URL error */}).optional(),
+  });
+  
+  const bookFormSchema = bookFormSchemaBase
+    .refine(
+      (data) => {
+        if (data.bookInputMethod === "upload") return !editingBook || (editingBook && data.bookFile && data.bookFile.length > 0) || (editingBook && !data.bookFile); // Allow no file on edit if not changing
+        if (data.bookInputMethod === "upload" && !editingBook) return data.bookFile && data.bookFile.length > 0;
+        if (data.bookInputMethod === "url") return !!data.bookUrl;
+        return false;
+      },
+      {
+        message: t('bookForm.error.sourceRequired'),
+        path: ["bookFile"], 
+      }
+    )
+     .refine(
+      (data) => { // Cover is optional
+        if (data.coverInputMethod === "upload" && data.coverImageFile && data.coverImageFile.length > 0) return true;
+        if (data.coverInputMethod === "url" && !!data.coverImageUrlInput) return true;
+        // If no new file/URL is provided, it's fine (cover is optional or keeping existing)
+        return true; 
+      },
+      {
+        message: t('bookForm.error.coverRequired'), 
+        path: ["coverImageFile"], 
+      }
+    );
 
-
-type BookFormValues = z.infer<typeof bookFormSchema>;
-
-interface BookFormProps {
-  onBookAdded: (book: Book) => void; // Changed from onBookAdded to onBookSaved for consistency
-  editingBook?: Book | null;
-}
-
-export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
+  type BookFormValues = z.infer<typeof bookFormSchema>;
+  
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -97,8 +94,7 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
 
   useEffect(() => {
     if (editingBook) {
-      // Determine input methods based on existing URLs
-      const bookIsUrl = editingBook.downloadUrl && !editingBook.downloadUrl.includes("firebasestorage.googleapis.com"); // Heuristic
+      const bookIsUrl = editingBook.downloadUrl && !editingBook.downloadUrl.includes("firebasestorage.googleapis.com");
       const coverIsUrl = editingBook.coverImageUrl && !editingBook.coverImageUrl.includes("firebasestorage.googleapis.com");
 
       form.reset({
@@ -108,10 +104,8 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
         category: editingBook.category || "",
         bookInputMethod: bookIsUrl ? "url" : "upload",
         bookUrl: bookIsUrl ? editingBook.downloadUrl : "",
-        // bookFile: undefined, // Let user re-upload if they want
         coverInputMethod: coverIsUrl ? "url" : "upload",
         coverImageUrlInput: coverIsUrl ? editingBook.coverImageUrl : "",
-        // coverImageFile: undefined,
       });
     } else {
       form.reset({
@@ -125,34 +119,45 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
 
   async function onSubmit(data: BookFormValues) {
     if (!user) {
-      toast({ title: "Error", description: "You must be logged in.", variant: "destructive" });
+      toast({ title: t('general.error.unexpected'), description: t('general.error.mustBeLoggedIn'), variant: "destructive" });
       return;
     }
     setLoading(true);
 
     try {
-      const storage = getStorage();
-      let finalDownloadUrl = data.bookUrl;
-      let finalCoverImageUrl = data.coverImageUrlInput;
+      let finalDownloadUrl = editingBook?.downloadUrl; // Start with existing if editing
+      let finalCoverImageUrl = editingBook?.coverImageUrl; // Start with existing if editing
 
-      // Handle book file
+
       if (data.bookInputMethod === "upload" && data.bookFile && data.bookFile.length > 0) {
         const bookFile = data.bookFile[0];
+        const storage = getStorage();
         const bookFileRef = ref(storage, `books/${user.uid}/${Date.now()}_${bookFile.name}`);
         const bookUploadSnapshot = await uploadBytes(bookFileRef, bookFile);
         finalDownloadUrl = await getDownloadURL(bookUploadSnapshot.ref);
+      } else if (data.bookInputMethod === "url" && data.bookUrl) {
+        finalDownloadUrl = data.bookUrl;
       }
-
-      // Handle cover image
+      
       if (data.coverInputMethod === "upload" && data.coverImageFile && data.coverImageFile.length > 0) {
         const coverFile = data.coverImageFile[0];
+        const storage = getStorage();
         const coverImageRef = ref(storage, `covers/${user.uid}/${Date.now()}_${coverFile.name}`);
         const coverUploadSnapshot = await uploadBytes(coverImageRef, coverFile);
         finalCoverImageUrl = await getDownloadURL(coverUploadSnapshot.ref);
+      } else if (data.coverInputMethod === "url" && data.coverImageUrlInput) {
+        finalCoverImageUrl = data.coverImageUrlInput;
+      } else if (data.coverInputMethod === "upload" && (!data.coverImageFile || data.coverImageFile.length === 0) && !editingBook?.coverImageUrl && !data.coverImageUrlInput) {
+        // If was upload, no new file, no existing cover, and no input URL -> means no cover or cleared
+        finalCoverImageUrl = undefined;
+      } else if (data.coverInputMethod === "url" && !data.coverImageUrlInput && !editingBook?.coverImageUrl && (!data.coverImageFile || data.coverImageFile.length === 0)) {
+        // If was URL, no new URL, no existing cover, and no input file -> means no cover or cleared
+        finalCoverImageUrl = undefined;
       }
-      
+
+
       if (!finalDownloadUrl) {
-        toast({ title: "Error", description: "Book file or URL is required.", variant: "destructive" });
+        toast({ title: t('general.error.unexpected'), description: t('bookForm.error.noDownloadUrl'), variant: "destructive" });
         setLoading(false);
         return;
       }
@@ -163,7 +168,7 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
         description: data.description,
         category: data.category,
         downloadUrl: finalDownloadUrl,
-        coverImageUrl: finalCoverImageUrl || undefined, // Store undefined if empty
+        coverImageUrl: finalCoverImageUrl || undefined, 
         uploadedBy: user.uid,
       };
 
@@ -171,13 +176,13 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
         const bookDocRef = doc(db, BOOKS_COLLECTION, editingBook.id);
         bookData.updatedAt = serverTimestamp();
         await updateDoc(bookDocRef, bookData);
-        toast({ title: "Book Updated", description: `"${data.title}" has been successfully updated.`});
+        toast({ title: t('bookForm.toast.updated.title'), description: `"${data.title}" ${t('bookForm.toast.updated.description')}`});
         onBookAdded({ ...editingBook, ...bookData, updatedAt: new Date() } as Book);
       } else {
         bookData.uploadedAt = serverTimestamp();
         bookData.updatedAt = serverTimestamp();
         const docRef = await addDoc(collection(db, BOOKS_COLLECTION), bookData);
-        toast({ title: "Book Added", description: `"${data.title}" has been successfully added.` });
+        toast({ title: t('bookForm.toast.added.title'), description: `"${data.title}" ${t('bookForm.toast.added.description')}` });
         onBookAdded({ id: docRef.id, ...bookData, uploadedAt: new Date(), updatedAt: new Date() } as Book);
       }
       form.reset({
@@ -188,7 +193,7 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
 
     } catch (error) {
       console.error("Error adding/updating book:", error);
-      toast({ title: "Failed to Save Book", description: "Could not save the book. Please try again.", variant: "destructive" });
+      toast({ title: t('bookForm.toast.failed.title'), description: t('bookForm.toast.failed.description'), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -197,21 +202,21 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Book Title</FormLabel> <FormControl><Input placeholder="The Pilgrim's Progress" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-        <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author (Optional)</FormLabel> <FormControl><Input placeholder="John Bunyan" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-        <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description (Optional)</FormLabel> <FormControl><Textarea placeholder="A brief summary of the book..." {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-        <FormField control={form.control} name="category" render={({ field }) => ( <FormItem> <FormLabel>Category (Optional)</FormLabel> <FormControl><Input placeholder="e.g., Theology, Biography" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+        <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>{t('bookForm.title.label')}</FormLabel> <FormControl><Input placeholder={t('bookForm.title.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+        <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>{t('bookForm.author.label')}</FormLabel> <FormControl><Input placeholder={t('bookForm.author.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+        <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>{t('bookForm.description.label')}</FormLabel> <FormControl><Textarea placeholder={t('bookForm.description.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+        <FormField control={form.control} name="category" render={({ field }) => ( <FormItem> <FormLabel>{t('bookForm.category.label')}</FormLabel> <FormControl><Input placeholder={t('bookForm.category.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
 
         <FormField
           control={form.control}
           name="bookInputMethod"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Book Source</FormLabel>
+              <FormLabel>{t('bookForm.source.label')}</FormLabel>
               <FormControl>
                 <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4">
-                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="upload" /></FormControl> <FormLabel className="font-normal">Upload File</FormLabel> </FormItem>
-                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="url" /></FormControl> <FormLabel className="font-normal">Use URL</FormLabel> </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="upload" /></FormControl> <FormLabel className="font-normal">{t('bookForm.source.upload')}</FormLabel> </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="url" /></FormControl> <FormLabel className="font-normal">{t('bookForm.source.url')}</FormLabel> </FormItem>
                 </RadioGroup>
               </FormControl>
               <FormMessage />
@@ -219,10 +224,10 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
           )}
         />
         {bookInputMethod === "upload" && (
-          <FormField control={form.control} name="bookFile" render={({ field: { onChange, ...rest } }) => ( <FormItem> <FormLabel>Book File (PDF, EPUB, etc.)</FormLabel> <FormControl><Input type="file" onChange={(e) => onChange(e.target.files)} {...rest} /></FormControl> <FormMessage /> </FormItem> )}/>
+          <FormField control={form.control} name="bookFile" render={({ field: { onChange, value, ...rest } }) => ( <FormItem> <FormLabel>{t('bookForm.file.label')}</FormLabel> <FormControl><Input type="file" onChange={(e) => onChange(e.target.files)} {...rest} /></FormControl> <FormMessage /> </FormItem> )}/>
         )}
         {bookInputMethod === "url" && (
-          <FormField control={form.control} name="bookUrl" render={({ field }) => ( <FormItem> <FormLabel>Book URL</FormLabel> <FormControl><Input type="url" placeholder="https://example.com/book.pdf" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+          <FormField control={form.control} name="bookUrl" render={({ field }) => ( <FormItem> <FormLabel>{t('bookForm.url.label')}</FormLabel> <FormControl><Input type="url" placeholder={t('bookForm.url.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         )}
 
         <FormField
@@ -230,11 +235,11 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
           name="coverInputMethod"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Cover Image Source (Optional)</FormLabel>
+              <FormLabel>{t('bookForm.coverSource.label')}</FormLabel>
               <FormControl>
                 <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4">
-                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="upload" /></FormControl> <FormLabel className="font-normal">Upload Image</FormLabel> </FormItem>
-                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="url" /></FormControl> <FormLabel className="font-normal">Use Image URL</FormLabel> </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="upload" /></FormControl> <FormLabel className="font-normal">{t('bookForm.coverSource.upload')}</FormLabel> </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0"> <FormControl><RadioGroupItem value="url" /></FormControl> <FormLabel className="font-normal">{t('bookForm.coverSource.url')}</FormLabel> </FormItem>
                 </RadioGroup>
               </FormControl>
               <FormMessage />
@@ -242,17 +247,18 @@ export default function BookForm({ onBookAdded, editingBook }: BookFormProps) {
           )}
         />
         {coverInputMethod === "upload" && (
-          <FormField control={form.control} name="coverImageFile" render={({ field: { onChange, ...rest } }) => ( <FormItem> <FormLabel>Cover Image File</FormLabel> <FormControl><Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files)} {...rest} /></FormControl> <FormMessage /> </FormItem> )}/>
+          <FormField control={form.control} name="coverImageFile" render={({ field: { onChange, value, ...rest } }) => ( <FormItem> <FormLabel>{t('bookForm.coverFile.label')}</FormLabel> <FormControl><Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files)} {...rest} /></FormControl> <FormMessage /> </FormItem> )}/>
         )}
         {coverInputMethod === "url" && (
-          <FormField control={form.control} name="coverImageUrlInput" render={({ field }) => ( <FormItem> <FormLabel>Cover Image URL</FormLabel> <FormControl><Input type="url" placeholder="https://example.com/cover.jpg" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+          <FormField control={form.control} name="coverImageUrlInput" render={({ field }) => ( <FormItem> <FormLabel>{t('bookForm.coverUrl.label')}</FormLabel> <FormControl><Input type="url" placeholder={t('bookForm.coverUrl.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         )}
         
         <Button type="submit" disabled={loading} className="w-full btn-animated">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {editingBook ? "Save Changes" : "Add Book"}
+          {editingBook ? t('bookForm.button.save') : t('bookForm.button.add')}
         </Button>
       </form>
     </Form>
   );
 }
+export default BookForm;

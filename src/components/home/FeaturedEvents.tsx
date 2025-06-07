@@ -11,10 +11,12 @@ import { collection, getDocs, limit, orderBy, query, Timestamp, where } from "fi
 import { db } from "@/lib/firebase";
 import { EVENTS_COLLECTION } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
+
 
 const formatDate = (timestamp: Timestamp | Date) => {
   const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-US', { // Consider making locale for date formatting dynamic with i18n library
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -26,6 +28,7 @@ const formatDate = (timestamp: Timestamp | Date) => {
 export default function FeaturedEvents() {
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -33,7 +36,7 @@ export default function FeaturedEvents() {
         const today = Timestamp.now();
         const eventsQuery = query(
           collection(db, EVENTS_COLLECTION),
-          where("date", ">=", today), // Fetch upcoming or ongoing events
+          where("date", ">=", today), 
           orderBy("date", "asc"),
           limit(3)
         );
@@ -43,7 +46,6 @@ export default function FeaturedEvents() {
           fetchedEvents.push({ id: doc.id, ...doc.data() } as ChurchEvent);
         });
 
-        // If fewer than 3 upcoming events, fetch recent past events to fill up
         if (fetchedEvents.length < 3) {
           const pastEventsQuery = query(
             collection(db, EVENTS_COLLECTION),
@@ -55,11 +57,10 @@ export default function FeaturedEvents() {
           pastQuerySnapshot.forEach((doc) => {
             fetchedEvents.push({ id: doc.id, ...doc.data() } as ChurchEvent);
           });
-          // Re-sort if past events were added
           fetchedEvents.sort((a, b) => (a.date as Timestamp).toMillis() - (b.date as Timestamp).toMillis());
         }
         
-        setEvents(fetchedEvents.slice(0,3)); // Ensure only 3 are shown
+        setEvents(fetchedEvents.slice(0,3)); 
 
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -73,7 +74,7 @@ export default function FeaturedEvents() {
   if (loading) {
     return (
       <section className="py-12 md:py-16">
-        <h2 className="text-3xl font-headline font-semibold text-center mb-8 text-primary">Featured Events</h2>
+        <h2 className="text-3xl font-headline font-semibold text-center mb-8 text-primary">{t('home.featuredEvents.title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(3)].map((_, i) => (
             <Card key={i} className="overflow-hidden card-animated">
@@ -100,8 +101,8 @@ export default function FeaturedEvents() {
   if (events.length === 0 && !loading) {
     return (
        <section className="py-12 md:py-16">
-        <h2 className="text-3xl font-headline font-semibold text-center mb-8 text-primary">Featured Events</h2>
-        <p className="text-center text-muted-foreground">No upcoming events at the moment. Please check back later.</p>
+        <h2 className="text-3xl font-headline font-semibold text-center mb-8 text-primary">{t('home.featuredEvents.title')}</h2>
+        <p className="text-center text-muted-foreground">{t('home.featuredEvents.empty')}</p>
       </section>
     );
   }
@@ -110,7 +111,7 @@ export default function FeaturedEvents() {
     <section className="py-12 md:py-16 bg-secondary/30 rounded-lg mt-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-headline font-semibold text-center mb-10 text-primary">
-          Upcoming Events
+          {t('home.featuredEvents.upcomingTitle')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
@@ -119,7 +120,7 @@ export default function FeaturedEvents() {
                 <div className="relative h-56 w-full">
                   <Image
                     src={event.imageUrl}
-                    alt={event.title}
+                    alt={event.title} // Event title is dynamic, not translated here
                     layout="fill"
                     objectFit="cover"
                     data-ai-hint="event gathering"
@@ -151,7 +152,7 @@ export default function FeaturedEvents() {
               </CardContent>
               <CardFooter>
                 <Button asChild variant="outline" className="text-primary p-0 hover:text-accent w-full">
-                  <Link href={`/events/${event.id}`}>View Details</Link>
+                  <Link href={`/events/${event.id}`}>{t('general.viewDetails')}</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -160,7 +161,7 @@ export default function FeaturedEvents() {
         {events.length > 0 && (
            <div className="text-center mt-10">
             <Button asChild size="lg" className="btn-animated">
-              <Link href="/events">View All Events</Link>
+              <Link href="/events">{t('home.featuredEvents.viewAll')}</Link>
             </Button>
           </div>
         )}

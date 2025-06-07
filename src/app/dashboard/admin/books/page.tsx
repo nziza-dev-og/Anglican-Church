@@ -27,11 +27,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AdminBooksPage() {
   const { userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [books, setBooks] = useState<Book[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -57,7 +59,7 @@ export default function AdminBooksPage() {
       setBooks(fetchedBooks);
     } catch (error) {
       console.error("Error fetching books:", error);
-      toast({ title: "Error", description: "Could not fetch books.", variant: "destructive" });
+      toast({ title: t('general.error.unexpected'), description: t('admin.books.toast.error.fetch'), variant: "destructive" });
     } finally {
       setLoadingData(false);
     }
@@ -67,7 +69,7 @@ export default function AdminBooksPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchBooks();
     }
-  }, [userProfile]);
+  }, [userProfile, t, toast]); // Added t and toast to dependencies
 
   const handleBookSaved = (savedBook: Book) => {
     if (editingBook) {
@@ -86,8 +88,8 @@ export default function AdminBooksPage() {
   
   const toggleForm = () => {
     setShowForm(!showForm);
-    if (showForm) { // If form was open and is now closing
-      setEditingBook(null); // Reset editing state
+    if (showForm) { 
+      setEditingBook(null); 
     }
   };
 
@@ -95,17 +97,17 @@ export default function AdminBooksPage() {
     try {
       await deleteDoc(doc(db, BOOKS_COLLECTION, bookId));
       setBooks(prevBooks => prevBooks.filter(b => b.id !== bookId));
-      toast({ title: "Book Deleted", description: `"${bookTitle}" has been removed.` });
+      toast({ title: t('admin.books.toast.deleted.title'), description: `"${bookTitle}" ${t('admin.books.toast.deleted.description')}` });
     } catch (error) {
       console.error("Error deleting book:", error);
-      toast({ title: "Error", description: "Could not delete book.", variant: "destructive"});
+      toast({ title: t('general.error.unexpected'), description: t('admin.books.toast.error.delete'), variant: "destructive"});
     }
   };
 
   if (authLoading || (!userProfile && !authLoading)) {
     return (
       <div>
-        <PageTitle title="Manage Books" />
+        <PageTitle title={t('admin.books.title')} />
         <Skeleton className="h-12 w-32 mb-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
@@ -117,11 +119,11 @@ export default function AdminBooksPage() {
   return (
     <div>
       <PageTitle
-        title="Manage Books"
-        subtitle="Add, edit, or remove books from the digital library."
+        title={t('admin.books.title')}
+        subtitle={t('admin.books.subtitle')}
         actions={
           <Button onClick={toggleForm} className="btn-animated">
-            <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? "Cancel" : "Add New Book"}
+            <PlusCircle className="mr-2 h-5 w-5" /> {showForm ? t('general.cancel') : t('admin.books.addNew')}
           </Button>
         }
       />
@@ -129,7 +131,7 @@ export default function AdminBooksPage() {
       {showForm && (
         <Card className="mb-8 card-animated">
           <CardHeader>
-            <CardTitle className="font-body">{editingBook ? "Edit Book" : "Add a New Book"}</CardTitle>
+            <CardTitle className="font-body">{editingBook ? t('admin.books.form.editTitle') : t('admin.books.form.addTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <BookForm onBookAdded={handleBookSaved} editingBook={editingBook} />
@@ -146,8 +148,8 @@ export default function AdminBooksPage() {
       ) : books.length === 0 && !showForm ? (
         <div className="text-center py-12">
           <BookOpen className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Books in Library</h3>
-          <p className="text-muted-foreground">Click "Add New Book" to get started.</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('admin.books.empty.title')}</h3>
+          <p className="text-muted-foreground">{t('admin.books.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -165,39 +167,39 @@ export default function AdminBooksPage() {
               <CardHeader className="pt-4 pb-2">
                 <CardTitle className="font-body text-base text-primary line-clamp-2">{book.title}</CardTitle>
                 {book.author && (
-                  <CardDescription className="text-xs text-muted-foreground">By {book.author}</CardDescription>
+                  <CardDescription className="text-xs text-muted-foreground">{t('general.by')} {book.author}</CardDescription>
                 )}
               </CardHeader>
               <CardContent className="flex-grow pb-1 text-xs">
-                 Category: {book.category || 'N/A'}
+                 {t('general.category')} {book.category || 'N/A'}
               </CardContent>
               <CardFooter className="flex flex-col space-y-2 !pt-2">
                 <Button asChild variant="outline" size="sm" className="w-full">
                   <Link href={book.downloadUrl} target="_blank" rel="noopener noreferrer">
-                    <Download className="mr-2 h-4 w-4" /> Download
+                    <Download className="mr-2 h-4 w-4" /> {t('general.download')}
                   </Link>
                 </Button>
                 <div className="flex w-full space-x-2">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditBook(book)}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
+                    <Edit className="mr-2 h-4 w-4" /> {t('general.edit')}
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" size="sm" className="flex-1">
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        <Trash2 className="mr-2 h-4 w-4" /> {t('general.delete')}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('admin.books.delete.confirm.title')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the book "{book.title}".
+                          {t('admin.books.delete.confirm.description')} "{book.title}".
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('general.cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => handleDeleteBook(book.id!, book.title)}>
-                          Delete
+                          {t('general.delete')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

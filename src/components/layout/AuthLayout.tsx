@@ -1,13 +1,16 @@
 
+"use client";
 import type { ReactNode } from 'react';
 import Logo from '@/components/shared/Logo';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AuthLayoutProps {
   children: ReactNode;
-  title: string;
+  title: string; // Title will be passed already translated
 }
 
 export default function AuthLayout({ children, title }: AuthLayoutProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 sm:p-6 lg:p-8">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
@@ -17,10 +20,11 @@ export default function AuthLayout({ children, title }: AuthLayoutProps) {
             {title}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Welcome to Rubavu Anglican Connect
+            {t('auth.welcomeMessage')}
           </p>
         </div>
         {children}
       </div>
     </div>
   );
+}
