@@ -2,7 +2,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LogOut,
   UserCircle,
@@ -14,13 +14,13 @@ import {
   Info,
   CalendarDays,
   BookOpen,
-  Users, // For Choirs/Unions if specific icons are too many
+  Users, 
   Music,
   Handshake,
   Video,
   ShieldCheck,
-  Mails, // For Contact
-  MessageSquare, // For Chat
+  Mails, 
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +38,7 @@ import Logo from '@/components/shared/Logo';
 import { useAuth } from '@/hooks/useAuth';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SidebarNav } from './SidebarNav';
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar'; // Import DashboardSidebar
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Locale } from '@/lib/translations';
@@ -52,7 +53,9 @@ interface NavLink {
 export default function Header() {
   const { user, userProfile, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+  const [mobileAdminNavOpen, setMobileAdminNavOpen] = React.useState(false); // State for admin sidebar
   const { currentLocale, setCurrentLocale, availableLocales } = useLanguage();
   const { t } = useTranslation();
 
@@ -74,29 +77,53 @@ export default function Header() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   }
 
+  const isOnDashboard = pathname.startsWith('/dashboard');
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
-          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="mr-2 md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">{t('sidebar.menuTitle')}</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
-               <SheetHeader className="p-4 border-b border-sidebar-border flex flex-row items-center justify-between">
-                <Logo textSize="text-2xl"/>
-                <SheetTitle>{t('header.mobileMenuTitle')}</SheetTitle> 
-              </SheetHeader>
-              <SidebarNav 
-                items={NAV_ITEMS.map(item => ({ ...item, label: t(item.labelKey), icon: item.icon }))} 
-                isMobile={true} 
-                onLinkClick={() => setMobileNavOpen(false)}
-              />
-            </SheetContent>
-          </Sheet>
+          {/* Mobile Dashboard Nav Trigger */}
+          {isOnDashboard && user && (
+            <Sheet open={mobileAdminNavOpen} onOpenChange={setMobileAdminNavOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="mr-2 md:hidden">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">{t('sidebar.menuTitle')}</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
+                <SheetHeader className="p-4 border-b border-sidebar-border flex flex-row items-center justify-between">
+                  <Logo textSize="text-2xl" />
+                  <SheetTitle>{t('sidebar.menuTitle')}</SheetTitle>
+                </SheetHeader>
+                <DashboardSidebar onLinkClick={() => setMobileAdminNavOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          )}
+
+          {/* Main Mobile Nav Trigger (hidden on dashboard) */}
+          {!isOnDashboard && (
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="mr-2 md:hidden">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">{t('header.mobileMenuTitle')}</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
+                 <SheetHeader className="p-4 border-b border-sidebar-border flex flex-row items-center justify-between">
+                  <Logo textSize="text-2xl"/>
+                  <SheetTitle>{t('header.mobileMenuTitle')}</SheetTitle> 
+                </SheetHeader>
+                <SidebarNav 
+                  items={NAV_ITEMS.map(item => ({ ...item, label: t(item.labelKey), icon: item.icon }))} 
+                  isMobile={true} 
+                  onLinkClick={() => setMobileNavOpen(false)}
+                />
+              </SheetContent>
+            </Sheet>
+          )}
           <Logo className="hidden md:flex" />
         </div>
 
@@ -151,7 +178,7 @@ export default function Header() {
                       {userProfile?.email}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground pt-1">
-                      {t('header.userRole')} {userProfile?.role ? t(`userRoles.${userProfile.role.toLowerCase().replace(/\s+/g, '')}`) : t('general.notAvailableShort')}
+                      {t('header.userRole')} {userProfile?.role ? t(`userRoles.${userProfile.role.toLowerCase().replace(new RegExp(/\s+/g), '')}`) : t('general.notAvailableShort')}
                     </p>
                   </div>
                 </DropdownMenuLabel>

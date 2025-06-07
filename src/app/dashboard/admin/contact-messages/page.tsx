@@ -11,6 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -31,7 +32,7 @@ export default function AdminContactMessagesPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null); // To show loading on specific action buttons
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && userProfile &&
@@ -40,29 +41,48 @@ export default function AdminContactMessagesPage() {
     }
   }, [userProfile, authLoading, router]);
 
-  const fetchMessages = useCallback(async () => {
-    setLoadingData(true);
-    try {
-      const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
-      const querySnapshot = await getDocs(messagesQuery);
-      const fetchedMessages: ContactMessage[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedMessages.push({ id: doc.id, ...doc.data() } as ContactMessage);
-      });
-      setMessages(fetchedMessages);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
-    } finally {
-      setLoadingData(false);
-    }
-  }, [t, toast]);
-
   useEffect(() => {
-    if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
-      fetchMessages();
-    }
-  }, [userProfile, fetchMessages]);
+    let isMounted = true;
+
+    const loadMessages = async () => {
+      if (!authLoading && userProfile) {
+        if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
+          if (isMounted) setLoadingData(true);
+          try {
+            const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
+            const querySnapshot = await getDocs(messagesQuery);
+            const fetchedMessages: ContactMessage[] = [];
+            querySnapshot.forEach((doc) => {
+              fetchedMessages.push({ id: doc.id, ...doc.data() } as ContactMessage);
+            });
+            if (isMounted) {
+              setMessages(fetchedMessages);
+            }
+          } catch (error) {
+            console.error("Error fetching messages:", error);
+            if (isMounted) {
+              toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
+            }
+          } finally {
+            if (isMounted) {
+              setLoadingData(false);
+            }
+          }
+        } else {
+           if (isMounted) setLoadingData(false); // Not authorized
+        }
+      } else if (!authLoading && !userProfile) {
+         if (isMounted) setLoadingData(false); // No user profile
+      }
+      // If authLoading is true, we wait for it to become false.
+    };
+
+    loadMessages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userProfile, authLoading, t, toast]); // Dependencies for fetching data
   
   const handleToggleReadStatus = async (message: ContactMessage) => {
     if (!message.id) return;
@@ -93,25 +113,26 @@ export default function AdminContactMessagesPage() {
       toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.delete'), variant: "destructive" });
     } finally {
       setActionLoading(null);
+      setSelectedMessage(null); // Close any open dialogs for this message
+      setIsViewDialogOpen(false);
     }
   };
 
   const handleViewMessage = (message: ContactMessage) => {
     setSelectedMessage(message);
     setIsViewDialogOpen(true);
-    // Mark as read when viewed, if not already
     if (!message.isRead && message.id) {
-        handleToggleReadStatus({...message, isRead: false}); // Pass as if it's unread to toggle it to read
+        handleToggleReadStatus({...message, isRead: false}); 
     }
   };
 
   const formatDate = (timestamp: Timestamp | Date | undefined) => {
     if (!timestamp) return 'N/A';
     const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-    return format(date, 'PPP p'); // e.g., Jun 22, 2024 10:30 AM
+    return format(date, 'PPP p'); 
   };
 
-  if (authLoading || (!userProfile && !authLoading)) {
+  if (authLoading || (!userProfile && !authLoading && loadingData)) { // Check loadingData here for initial load if auth is done but profile is null
     return (
       <div>
         <PageTitle title={t('admin.contactMessages.pageTitle')} />
@@ -156,18 +177,20 @@ export default function AdminContactMessagesPage() {
               </TableHeader>
               <TableBody>
                 {messages.map((msg) => (
-                  <TableRow key={msg.id} className={!msg.isRead ? 'font-semibold bg-secondary/20 hover:bg-secondary/30' : 'hover:bg-muted/50'} onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>
-                    <TableCell>{msg.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">{msg.email}</TableCell>
-                    <TableCell className="max-w-xs truncate">{msg.subject}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{formatDate(msg.submittedAt)}</TableCell>
-                    <TableCell>
+                  <TableRow key={msg.id} className={!msg.isRead ? 'font-semibold bg-secondary/20 hover:bg-secondary/30' : 'hover:bg-muted/50'} >
+                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>{msg.name}</TableCell>
+                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden md:table-cell">{msg.email}</TableCell>
+                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="max-w-xs truncate">{msg.subject}</TableCell>
+                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden lg:table-cell">{formatDate(msg.submittedAt)}</TableCell>
+                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>
                       <Badge variant={msg.isRead ? "secondary" : "default"}>
                         {msg.isRead ? t('admin.contactMessages.status.read') : t('admin.contactMessages.status.unread')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-1">
-                      {/* View button removed as row click handles view */}
+                      <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleViewMessage(msg);}} title={t('admin.contactMessages.actions.view')}>
+                         <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleToggleReadStatus(msg);}} title={msg.isRead ? t('admin.contactMessages.actions.markAsUnread') : t('admin.contactMessages.actions.markAsRead')} disabled={actionLoading === `read-${msg.id}`}>
                         {actionLoading === `read-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : msg.isRead ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                       </Button>
@@ -178,7 +201,7 @@ export default function AdminContactMessagesPage() {
                       </Button>
                       <AlertDialog onOpenChange={(open) => { if(!open) setSelectedMessage(null);}}>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" title={t('admin.contactMessages.actions.delete')} disabled={actionLoading === `delete-${msg.id}`} onClick={(e) => {e.stopPropagation(); setSelectedMessage(msg); /* Trigger will open the dialog */}}>
+                          <Button variant="ghost" size="icon" title={t('admin.contactMessages.actions.delete')} disabled={actionLoading === `delete-${msg.id}`} onClick={(e) => {e.stopPropagation(); setSelectedMessage(msg); }}>
                              {actionLoading === `delete-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4 text-destructive" />}
                           </Button>
                         </AlertDialogTrigger>
@@ -220,7 +243,7 @@ export default function AdminContactMessagesPage() {
             <ScrollArea className="max-h-[60vh] my-4 pr-6">
               <p className="whitespace-pre-wrap text-sm">{selectedMessage.message}</p>
             </ScrollArea>
-            <DialogFooter className="sm:justify-start">
+            <DialogFooter className="sm:justify-start space-x-2">
                <Button asChild variant="default">
                 <a href={`mailto:${selectedMessage.email}?subject=Re: ${encodeURIComponent(selectedMessage.subject)}`}>
                   <Mail className="mr-2 h-4 w-4" /> {t('admin.contactMessages.actions.reply')}

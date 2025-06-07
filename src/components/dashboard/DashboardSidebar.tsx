@@ -29,6 +29,10 @@ interface NavItem {
   roles?: string[]; 
 }
 
+interface DashboardSidebarProps {
+  onLinkClick?: () => void; // Optional prop to handle link clicks
+}
+
 const allNavItems: NavItem[] = [
   { href: "/dashboard", labelKey: "sidebar.overview", icon: <LayoutDashboard /> },
   { href: "/dashboard/profile", labelKey: "sidebar.myProfile", icon: <User /> },
@@ -47,7 +51,7 @@ const allNavItems: NavItem[] = [
   { href: "/dashboard/settings", labelKey: "sidebar.appSettings", icon: <Settings />, roles: [USER_ROLES.SUPER_ADMIN] },
 ];
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ onLinkClick }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { userProfile } = useAuth();
   const { t } = useTranslation();
@@ -65,19 +69,26 @@ export default function DashboardSidebar() {
     return 0;
   });
 
+  const handleLinkClick = () => {
+    if (onLinkClick) {
+      onLinkClick();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full p-4 space-y-2 overflow-y-auto">
-      <h2 className="text-lg font-semibold text-primary px-2 mb-4">{t('sidebar.menuTitle')}</h2>
+      <h2 className="text-lg font-semibold text-sidebar-primary px-2 mb-4">{t('sidebar.menuTitle')}</h2>
       <nav className="flex flex-col space-y-1">
         {visibleNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
+            onClick={handleLinkClick}
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
               pathname === item.href
-                ? "bg-primary text-primary-foreground"
-                : "text-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             )}
           >
             {item.icon}
