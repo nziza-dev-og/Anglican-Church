@@ -82,11 +82,10 @@ export default function AboutPage() {
             (More details about specific leaders can be added here or on a separate leadership page if needed).
           </p>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Example Leader Card - replace with actual data */}
             {[
-              { name: "Rev. [Name]", role: "Chief Pastor", image: "https://placehold.co/300x300.png?text=CP", dataAiHint:"pastor portrait" },
-              { name: "Pastor [Name]", role: "Associate Pastor", image: "https://placehold.co/300x300.png?text=AP", dataAiHint:"pastor portrait" },
-              { name: "[Name]", role: "Head Diacon", image: "https://placehold.co/300x300.png?text=HD", dataAiHint:"church leader" },
+              { name: "Rev. [Name]", role: "Chief Pastor", image: "https://placehold.co/300x300.png", dataAiHint:"pastor portrait" },
+              { name: "Pastor [Name]", role: "Associate Pastor", image: "https://placehold.co/300x300.png", dataAiHint:"pastor portrait" },
+              { name: "[Name]", role: "Head Diacon", image: "https://placehold.co/300x300.png", dataAiHint:"church leader" },
             ].map(leader => (
               <Card key={leader.name} className="overflow-hidden card-animated">
                  <div className="relative h-60 w-full">
@@ -99,3 +98,8 @@ export default function AboutPage() {
               </Card>
             ))}
           </div>
+        </section>
+      </div>
+    </AppLayout>
+  );
+}
