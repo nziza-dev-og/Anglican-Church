@@ -170,13 +170,15 @@ export default function ChatPage() {
         {/* User List Sidebar */}
         <div className="w-full md:w-1/3 lg:w-1/4 border-b md:border-b-0 md:border-r">
           <div className="p-4 border-b">
-            <Input
-              placeholder={t('chat.searchUsersPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-              startIcon={<UserSearch className="text-muted-foreground" />}
-            />
+            <div className="relative">
+              <UserSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t('chat.searchUsersPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10"
+              />
+            </div>
           </div>
           <ScrollArea className="h-[200px] md:h-full">
             {loadingUsers ? (
