@@ -1,10 +1,10 @@
+
 "use client";
 
 import type { User as FirebaseUser } from 'firebase/auth';
 import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, Timestamp, onSnapshot } from 'firebase/firestore';
-import type { ReactNode } from 'react';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { auth, db } from '@/lib/firebase';
 import type { UserProfile, UserRole } from '@/types';
 import { USERS_COLLECTION, USER_ROLES } from '@/lib/constants';
@@ -57,8 +57,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserProfile(null);
         setLoading(false);
         // Redirect to login if not on public pages
-        const publicPaths = ['/auth/login', '/auth/register', '/', '/about', '/contact'];
-        if (!publicPaths.includes(pathname) && !pathname.startsWith('/_next')) {
+        const publicPaths = ['/auth/login', '/auth/register', '/', '/about', '/contact', '/events', '/books', '/choirs', '/unions', '/videos', '/ceremonies'];
+        const isPublicEventDetail = pathname.startsWith('/events/');
+
+        if (!publicPaths.some(p => pathname.startsWith(p)) && !isPublicEventDetail && !pathname.startsWith('/_next')) {
          // router.push('/auth/login');
         }
       }
