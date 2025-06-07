@@ -177,16 +177,17 @@ export const translations: Translations = {
   'contact.findUs.title': placeholder('Find Us'),
 
   // User Roles
-  'userRoles.superAdmin': { en: 'Super Admin', rw: 'Umunyamabanga Mukuru Cyane', fr: 'Super Administrateur', sw: 'Msimamizi Mkuu', es: 'Super Administrador', de: 'Super-Administrator' },
-  'userRoles.churchAdmin': { en: 'Church Admin', rw: 'Umunyamabanga w\'Itorero', fr: 'Administrateur de l\'Église', sw: 'Msimamizi wa Kanisa', es: 'Administrador de la Iglesia', de: 'Kirchenadministrator' },
+  'userRoles.superadmin': { en: 'Super Admin', rw: 'Umunyamabanga Mukuru Cyane', fr: 'Super Administrateur', sw: 'Msimamizi Mkuu', es: 'Super Administrador', de: 'Super-Administrator' },
+  'userRoles.churchadmin': { en: 'Church Admin', rw: 'Umunyamabanga w\'Itorero', fr: 'Administrateur de l\'Église', sw: 'Msimamizi wa Kanisa', es: 'Administrador de la Iglesia', de: 'Kirchenadministrator' },
   'userRoles.pastor': { en: 'Pastor', rw: 'Pasitoro', fr: 'Pasteur', sw: 'Mchungaji', es: 'Pastor', de: 'Pastor' },
-  'userRoles.chiefPastor': { en: 'Chief Pastor', rw: 'Pasitoro Mukuru', fr: 'Pasteur Principal', sw: 'Mchungaji Mkuu', es: 'Pastor Principal', de: 'Hauptpastor' },
+  'userRoles.chiefpastor': { en: 'Chief Pastor', rw: 'Pasitoro Mukuru', fr: 'Pasteur Principal', sw: 'Mchungaji Mkuu', es: 'Pastor Principal', de: 'Hauptpastor' },
   'userRoles.diacon': { en: 'Diacon', rw: 'Umudiyakoni', fr: 'Diacre', sw: 'Shemasi', es: 'Diácono', de: 'Diakon' },
-  'userRoles.choirAdmin': { en: 'Choir Admin', rw: 'Umunyamabanga wa Korali', fr: 'Administrateur de Chorale', sw: 'Msimamizi wa Kwaya', es: 'Administrador de Coro', de: 'Chorleiter' },
-  'userRoles.choirMember': { en: 'Choir Member', rw: 'Umuririmbyi', fr: 'Membre de Chorale', sw: 'Mwanakwaya', es: 'Miembro del Coro', de: 'Chormitglied' },
-  'userRoles.unionAdmin': { en: 'Union Admin', rw: 'Umunyamabanga w\'Itsinda', fr: 'Administrateur d\'Union', sw: 'Msimamizi wa Jumuiya', es: 'Administrador de Unión', de: 'Unionsleiter' },
-  'userRoles.unionMember': { en: 'Union Member', rw: 'Umunyamuryango w\'Itsinda', fr: 'Membre d\'Union', sw: 'Mwanajumuiya', es: 'Miembro de Unión', de: 'Unionsmitglied' },
-  'userRoles.regularMember': { en: 'Regular Member', rw: 'Umunyamuryango usanzwe', fr: 'Membre Régulier', sw: 'Mwanachama wa Kawaida', es: 'Miembro Regular', de: 'Reguläres Mitglied' },
+  'userRoles.choiradmin': { en: 'Choir Admin', rw: 'Umunyamabanga wa Korali', fr: 'Administrateur de Chorale', sw: 'Msimamizi wa Kwaya', es: 'Administrador de Coro', de: 'Chorleiter' },
+  'userRoles.choirmember': { en: 'Choir Member', rw: 'Umuririmbyi', fr: 'Membre de Chorale', sw: 'Mwanakwaya', es: 'Miembro del Coro', de: 'Chormitglied' },
+  'userRoles.unionadmin': { en: 'Union Admin', rw: 'Umunyamabanga w\'Itsinda', fr: 'Administrateur d\'Union', sw: 'Msimamizi wa Jumuiya', es: 'Administrador de Unión', de: 'Unionsleiter' },
+  'userRoles.unionmember': { en: 'Union Member', rw: 'Umunyamuryango w\'Itsinda', fr: 'Membre d\'Union', sw: 'Mwanajumuiya', es: 'Miembro de Unión', de: 'Unionsmitglied' },
+  'userRoles.regularmember': { en: 'Regular Member', rw: 'Umunyamuryango usanzwe', fr: 'Membre Régulier', sw: 'Mwanachama wa Kawaida', es: 'Miembro Regular', de: 'Reguläres Mitglied' },
+
 
   // Dashboard Main Page
   'dashboard.welcome': placeholder('Welcome,'), // Name will be appended
@@ -574,7 +575,7 @@ export const translations: Translations = {
   'unionInfoForm.button.add': placeholder('Add Union'),
   'unionInfoForm.button.save': placeholder('Save Changes'),
 
-  // Dashboard Sub Pages (Placeholders for now)
+  // Dashboard Sub Pages
   'dashboard.activities.pageTitle': placeholder('Manage Activities'),
   'dashboard.activities.pageSubtitle': placeholder('Oversee and manage church-related activities.'),
   'dashboard.activities.cardTitle': placeholder('Activity Management'),
@@ -589,6 +590,11 @@ export const translations: Translations = {
   'dashboard.members.pageSubtitle': placeholder('Access and view the list of church members.'),
   'dashboard.members.cardTitle': placeholder('Church Member Directory'),
   'dashboard.members.description': placeholder('This section will display a list of all church members. Functionality for searching, filtering, and viewing member details will be available.'),
+  'dashboard.members.listTitle': placeholder('Church Member List'),
+  'dashboard.members.total': placeholder('Total Members:'),
+  'dashboard.members.empty.title': placeholder('No Members Found'),
+  'dashboard.members.empty.description': placeholder('There are currently no members listed in the directory.'),
+
 
   'dashboard.settings.pageTitle': placeholder('Application Settings'),
   'dashboard.settings.pageSubtitle': placeholder('Manage global settings for Rubavu Anglican Connect.'),
