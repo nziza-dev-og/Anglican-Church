@@ -4,18 +4,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import type { SheetClose } from '@/components/ui/sheet'; // Only for type, not for rendering
+// No direct translation needed here if labels are passed pre-translated from Header
 
 interface NavItem {
-  label: string;
+  label: string; // Label is now pre-translated
   href: string;
-  icon?: React.ReactNode; // Optional icon
+  icon?: React.ReactNode; 
 }
 
 interface SidebarNavProps {
   items: NavItem[];
   isMobile?: boolean;
-  onLinkClick?: () => void; // Optional: to close sheet on mobile
+  onLinkClick?: () => void; 
 }
 
 export function SidebarNav({ items, isMobile, onLinkClick }: SidebarNavProps) {
@@ -33,14 +33,14 @@ export function SidebarNav({ items, isMobile, onLinkClick }: SidebarNavProps) {
           <Link
             key={index}
             href={item.href}
-            onClick={onLinkClick} // Close sheet on click if handler provided
+            onClick={onLinkClick} 
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               isActive
                 ? "bg-sidebar-primary text-sidebar-primary-foreground"
                 : "text-sidebar-foreground",
-              isMobile ? "text-base" : "" // Larger text for mobile if desired
+              isMobile ? "text-base" : "" 
             )}
             aria-current={isActive ? 'page' : undefined}
           >

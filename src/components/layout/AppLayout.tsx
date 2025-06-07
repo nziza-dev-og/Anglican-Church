@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import Header from './Header';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation'; // Import useTranslation
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -12,6 +13,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const { loading } = useAuth();
+  const { t } = useTranslation(); // Use the translation hook
 
   if (loading) {
     return (
@@ -28,7 +30,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {children}
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground border-t">
-        © {new Date().getFullYear()} Rubavu Anglican Connect. All rights reserved.
+        © {new Date().getFullYear()} {t('appName')}. {t('footer.rights')}
       </footer>
     </div>
   );
