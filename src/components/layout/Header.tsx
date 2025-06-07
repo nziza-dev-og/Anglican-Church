@@ -1,6 +1,6 @@
 
 "use client";
-import React from 'react'; // Added React import
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogOut, UserCircle, Settings, LayoutDashboard, Menu } from 'lucide-react';
@@ -16,9 +16,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from '@/components/shared/Logo';
 import { useAuth } from '@/hooks/useAuth';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"; // Added SheetClose
-import { SidebarNav } from './SidebarNav'; 
-import type { ComponentPropsWithoutRef, ElementRef } from 'react'; // For SheetClose type
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { SidebarNav } from './SidebarNav';
+import type { ComponentPropsWithoutRef, ElementRef } from 'react';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
@@ -59,7 +59,7 @@ export default function Header() {
               <SidebarNav 
                 items={NAV_ITEMS} 
                 isMobile={true} 
-                onLinkClick={() => setMobileNavOpen(false)} // Close sheet on link click
+                onLinkClick={() => setMobileNavOpen(false)}
               />
             </SheetContent>
           </Sheet>
@@ -124,11 +124,11 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="space-x-2">
-              <Button variant="outline" onClick={() => router.push('/auth/login')}>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <Button variant="outline" onClick={() => router.push('/auth/login')} className="w-full sm:w-auto">
                 Login
               </Button>
-              <Button onClick={() => router.push('/auth/register')}>
+              <Button onClick={() => router.push('/auth/register')} className="w-full sm:w-auto">
                 Register
               </Button>
             </div>
