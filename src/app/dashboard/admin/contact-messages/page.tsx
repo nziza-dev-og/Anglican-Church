@@ -69,12 +69,11 @@ export default function AdminContactMessagesPage() {
             }
           }
         } else {
-           if (isMounted) setLoadingData(false); // Not authorized
+           if (isMounted) setLoadingData(false); 
         }
       } else if (!authLoading && !userProfile) {
-         if (isMounted) setLoadingData(false); // No user profile
+         if (isMounted) setLoadingData(false); 
       }
-      // If authLoading is true, we wait for it to become false.
     };
 
     loadMessages();
@@ -82,7 +81,7 @@ export default function AdminContactMessagesPage() {
     return () => {
       isMounted = false;
     };
-  }, [userProfile, authLoading, t, toast]); // Dependencies for fetching data
+  }, [userProfile, authLoading, t, toast]); 
   
   const handleToggleReadStatus = async (message: ContactMessage) => {
     if (!message.id) return;
@@ -113,7 +112,7 @@ export default function AdminContactMessagesPage() {
       toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.delete'), variant: "destructive" });
     } finally {
       setActionLoading(null);
-      setSelectedMessage(null); // Close any open dialogs for this message
+      setSelectedMessage(null); 
       setIsViewDialogOpen(false);
     }
   };
@@ -126,13 +125,25 @@ export default function AdminContactMessagesPage() {
     }
   };
 
-  const formatDate = (timestamp: Timestamp | Date | undefined) => {
-    if (!timestamp) return 'N/A';
-    const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-    return format(date, 'PPP p'); 
+  const formatDate = (timestamp: Timestamp | Date | undefined | string | number) => {
+    if (!timestamp) return t('general.notAvailableShort');
+    try {
+      const date = timestamp instanceof Timestamp 
+        ? timestamp.toDate() 
+        : (typeof timestamp === 'string' || typeof timestamp === 'number' ? new Date(timestamp) : timestamp);
+      
+      if (!(date instanceof Date) || isNaN(date.getTime())) {
+        console.warn("Invalid date object received by formatDate:", timestamp);
+        return t('general.error.title') + ' ' + t('eventForm.date.label'); // Or a more specific error message
+      }
+      return format(date, 'PPP p');
+    } catch (e) {
+      console.error("Error in formatDate:", e, "Input:", timestamp);
+      return t('general.error.title') + ' ' + t('eventForm.date.label');
+    }
   };
 
-  if (authLoading || (!userProfile && !authLoading && loadingData)) { // Check loadingData here for initial load if auth is done but profile is null
+  if (authLoading || (!userProfile && !authLoading && loadingData)) { 
     return (
       <div>
         <PageTitle title={t('admin.contactMessages.pageTitle')} />
@@ -176,55 +187,61 @@ export default function AdminContactMessagesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {messages.map((msg) => (
-                  <TableRow key={msg.id} className={!msg.isRead ? 'font-semibold bg-secondary/20 hover:bg-secondary/30' : 'hover:bg-muted/50'} >
-                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>{msg.name}</TableCell>
-                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden md:table-cell">{msg.email}</TableCell>
-                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="max-w-xs truncate">{msg.subject}</TableCell>
-                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden lg:table-cell">{formatDate(msg.submittedAt)}</TableCell>
-                    <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>
-                      <Badge variant={msg.isRead ? "secondary" : "default"}>
-                        {msg.isRead ? t('admin.contactMessages.status.read') : t('admin.contactMessages.status.unread')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleViewMessage(msg);}} title={t('admin.contactMessages.actions.view')}>
-                         <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleToggleReadStatus(msg);}} title={msg.isRead ? t('admin.contactMessages.actions.markAsUnread') : t('admin.contactMessages.actions.markAsRead')} disabled={actionLoading === `read-${msg.id}`}>
-                        {actionLoading === `read-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : msg.isRead ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-                      </Button>
-                       <Button asChild variant="ghost" size="icon" title={t('admin.contactMessages.actions.reply')} onClick={(e) => e.stopPropagation()}>
-                        <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject)}`}>
-                          <Mail className="h-4 w-4" />
-                        </a>
-                      </Button>
-                      <AlertDialog onOpenChange={(open) => { if(!open) setSelectedMessage(null);}}>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" title={t('admin.contactMessages.actions.delete')} disabled={actionLoading === `delete-${msg.id}`} onClick={(e) => {e.stopPropagation(); setSelectedMessage(msg); }}>
-                             {actionLoading === `delete-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4 text-destructive" />}
-                          </Button>
-                        </AlertDialogTrigger>
-                        {selectedMessage && selectedMessage.id === msg.id && (
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>{t('admin.contactMessages.delete.confirm.title')}</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t('general.confirmation.cannotBeUndone')} {t('admin.contactMessages.delete.confirm.description')} "{msg.subject}" {t('general.by').toLowerCase()} {msg.name}?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t('general.cancel')}</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteMessage(msg.id!)} className={buttonVariants({variant: "destructive"})}>
-                              {t('general.delete')}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                        )}
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {messages.map((msg) => {
+                  let rowClass = 'hover:bg-muted/50';
+                  if (!msg.isRead) {
+                    rowClass = 'font-semibold bg-secondary/20 hover:bg-secondary/30';
+                  }
+                  return (
+                    <TableRow key={msg.id || Math.random()} className={rowClass} >
+                      <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>{msg.name || t('general.notAvailableShort')}</TableCell>
+                      <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden md:table-cell">{msg.email || t('general.notAvailableShort')}</TableCell>
+                      <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="max-w-xs truncate">{msg.subject || t('general.notAvailableShort')}</TableCell>
+                      <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden lg:table-cell">{formatDate(msg.submittedAt)}</TableCell>
+                      <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>
+                        <Badge variant={msg.isRead ? "secondary" : "default"}>
+                          {msg.isRead ? t('admin.contactMessages.status.read') : t('admin.contactMessages.status.unread')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right space-x-1">
+                        <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleViewMessage(msg);}} title={t('admin.contactMessages.actions.view')}>
+                           <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); handleToggleReadStatus(msg);}} title={msg.isRead ? t('admin.contactMessages.actions.markAsUnread') : t('admin.contactMessages.actions.markAsRead')} disabled={actionLoading === `read-${msg.id}`}>
+                          {actionLoading === `read-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : msg.isRead ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                        </Button>
+                         <Button asChild variant="ghost" size="icon" title={t('admin.contactMessages.actions.reply')} onClick={(e) => e.stopPropagation()}>
+                          <a href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || '')}`}>
+                            <Mail className="h-4 w-4" />
+                          </a>
+                        </Button>
+                        <AlertDialog onOpenChange={(open) => { if(!open) setSelectedMessage(null);}}>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" title={t('admin.contactMessages.actions.delete')} disabled={actionLoading === `delete-${msg.id}`} onClick={(e) => {e.stopPropagation(); setSelectedMessage(msg); }}>
+                               {actionLoading === `delete-${msg.id}` ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4 text-destructive" />}
+                            </Button>
+                          </AlertDialogTrigger>
+                          {selectedMessage && selectedMessage.id === msg.id && (
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('admin.contactMessages.delete.confirm.title')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('general.confirmation.cannotBeUndone')} {t('admin.contactMessages.delete.confirm.description')} "{msg.subject || t('general.notAvailableShort')}" {t('general.by').toLowerCase()} {msg.name || t('general.notAvailableShort')}?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('general.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteMessage(msg.id!)} className={buttonVariants({variant: "destructive"})}>
+                                {t('general.delete')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                          )}
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
@@ -235,17 +252,17 @@ export default function AdminContactMessagesPage() {
         <Dialog open={isViewDialogOpen} onOpenChange={(open) => {setIsViewDialogOpen(open); if (!open) setSelectedMessage(null);}}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{t('admin.contactMessages.viewMessage.title')}: {selectedMessage.subject}</DialogTitle>
+              <DialogTitle>{t('admin.contactMessages.viewMessage.title')}: {selectedMessage.subject || t('general.notAvailableShort')}</DialogTitle>
               <DialogDescription>
-                {t('general.by')} {selectedMessage.name} ({selectedMessage.email}) - {formatDate(selectedMessage.submittedAt)}
+                {t('general.by')} {selectedMessage.name || t('general.notAvailableShort')} ({selectedMessage.email || t('general.notAvailableShort')}) - {formatDate(selectedMessage.submittedAt)}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[60vh] my-4 pr-6">
-              <p className="whitespace-pre-wrap text-sm">{selectedMessage.message}</p>
+              <p className="whitespace-pre-wrap text-sm">{selectedMessage.message || t('general.noDescription')}</p>
             </ScrollArea>
             <DialogFooter className="sm:justify-start space-x-2">
                <Button asChild variant="default">
-                <a href={`mailto:${selectedMessage.email}?subject=Re: ${encodeURIComponent(selectedMessage.subject)}`}>
+                <a href={`mailto:${selectedMessage.email}?subject=Re: ${encodeURIComponent(selectedMessage.subject || '')}`}>
                   <Mail className="mr-2 h-4 w-4" /> {t('admin.contactMessages.actions.reply')}
                 </a>
               </Button>
@@ -259,3 +276,4 @@ export default function AdminContactMessagesPage() {
     </div>
   );
 }
+
