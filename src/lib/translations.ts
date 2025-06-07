@@ -635,6 +635,12 @@ export const translations: Translations = {
   'chat.loadingMessages': placeholder('Loading messages...'),
   'chat.notAuthenticated': placeholder('You must be logged in to access the chat.'),
   'chat.noMessages': placeholder('No messages yet. Be the first to say something!'),
+  'chat.selectUserPrompt': placeholder('Select a user to start chatting.'),
+  'chat.chattingWith': placeholder('Chatting with {{userName}}'), // Not used directly yet, but good for future
+  'chat.searchUsersPlaceholder': placeholder('Search users...'),
+  'chat.noUsersFound': placeholder('No users found.'),
+  'chat.loadingUsers': placeholder('Loading users...'),
+  'chat.noMessagesYetWith': placeholder('No messages yet with {{userName}}. Start the conversation!'),
 
 
 };
