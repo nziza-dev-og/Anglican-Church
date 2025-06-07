@@ -3,7 +3,6 @@ import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturedEvents from "@/components/home/FeaturedEvents";
 import AboutSnippet from "@/components/home/AboutSnippet";
-import PersonalizedRecommendations from "@/components/home/PersonalizedRecommendations";
 
 export default function HomePage() {
   return (
@@ -12,7 +11,6 @@ export default function HomePage() {
         <HeroSection />
         <FeaturedEvents />
         <AboutSnippet />
-        <PersonalizedRecommendations />
       </div>
     </AppLayout>
   );
