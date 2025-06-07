@@ -163,7 +163,7 @@ export default function AdminVideosPage() {
               <Link href={video.videoUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-video w-full group">
                 <Image
                   src={video.thumbnailUrl || "https://placehold.co/600x338.png"}
-                  alt={video.title}
+                  alt={t('videos.card.thumbnailAlt')}
                   layout="fill"
                   objectFit="cover"
                   data-ai-hint="video thumbnail"
@@ -214,3 +214,5 @@ export default function AdminVideosPage() {
     </div>
   );
 }
+
+    

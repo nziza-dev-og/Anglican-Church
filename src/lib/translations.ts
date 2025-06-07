@@ -85,6 +85,7 @@ export const translations: Translations = {
   'header.selectLanguage': placeholder('Select Language'),
   'header.languages': placeholder('Languages'),
   'header.userRole': placeholder('Role:'), // Role name will be appended
+  'header.mobileMenuTitle': placeholder('Menu'),
 
 
   // Footer
@@ -171,16 +172,16 @@ export const translations: Translations = {
   'contact.findUs.title': placeholder('Find Us'),
 
   // User Roles
-  'userRoles.superAdmin': placeholder('Super Admin'),
-  'userRoles.churchAdmin': placeholder('Church Admin'),
-  'userRoles.pastor': placeholder('Pastor'),
-  'userRoles.chiefPastor': placeholder('Chief Pastor'),
-  'userRoles.diacon': placeholder('Diacon'),
-  'userRoles.choirAdmin': placeholder('Choir Admin'),
-  'userRoles.choirMember': placeholder('Choir Member'),
-  'userRoles.unionAdmin': placeholder('Union Admin'),
-  'userRoles.unionMember': placeholder('Union Member'),
-  'userRoles.regularMember': placeholder('Regular Member'),
+  'userRoles.superAdmin': { en: 'Super Admin', rw: 'Umunyamabanga Mukuru Cyane', fr: 'Super Administrateur', sw: 'Msimamizi Mkuu', es: 'Super Administrador', de: 'Super-Administrator' },
+  'userRoles.churchAdmin': { en: 'Church Admin', rw: 'Umunyamabanga w\'Itorero', fr: 'Administrateur de l\'Église', sw: 'Msimamizi wa Kanisa', es: 'Administrador de la Iglesia', de: 'Kirchenadministrator' },
+  'userRoles.pastor': { en: 'Pastor', rw: 'Pasitoro', fr: 'Pasteur', sw: 'Mchungaji', es: 'Pastor', de: 'Pastor' },
+  'userRoles.chiefPastor': { en: 'Chief Pastor', rw: 'Pasitoro Mukuru', fr: 'Pasteur Principal', sw: 'Mchungaji Mkuu', es: 'Pastor Principal', de: 'Hauptpastor' },
+  'userRoles.diacon': { en: 'Diacon', rw: 'Umudiyakoni', fr: 'Diacre', sw: 'Shemasi', es: 'Diácono', de: 'Diakon' },
+  'userRoles.choirAdmin': { en: 'Choir Admin', rw: 'Umunyamabanga wa Korali', fr: 'Administrateur de Chorale', sw: 'Msimamizi wa Kwaya', es: 'Administrador de Coro', de: 'Chorleiter' },
+  'userRoles.choirMember': { en: 'Choir Member', rw: 'Umuririmbyi', fr: 'Membre de Chorale', sw: 'Mwanakwaya', es: 'Miembro del Coro', de: 'Chormitglied' },
+  'userRoles.unionAdmin': { en: 'Union Admin', rw: 'Umunyamabanga w\'Itsinda', fr: 'Administrateur d\'Union', sw: 'Msimamizi wa Jumuiya', es: 'Administrador de Unión', de: 'Unionsleiter' },
+  'userRoles.unionMember': { en: 'Union Member', rw: 'Umunyamuryango w\'Itsinda', fr: 'Membre d\'Union', sw: 'Mwanajumuiya', es: 'Miembro de Unión', de: 'Unionsmitglied' },
+  'userRoles.regularMember': { en: 'Regular Member', rw: 'Umunyamuryango usanzwe', fr: 'Membre Régulier', sw: 'Mwanachama wa Kawaida', es: 'Miembro Regular', de: 'Reguläres Mitglied' },
 
   // Dashboard Main Page
   'dashboard.welcome': placeholder('Welcome,'), // Name will be appended
@@ -360,6 +361,8 @@ export const translations: Translations = {
   'videos.empty.title': placeholder('No Videos Available'),
   'videos.empty.description': placeholder('Our video gallery is currently empty. Please check back soon.'),
   'videos.card.watch': placeholder('Watch Video'),
+  'videos.card.thumbnailAlt': placeholder('Video thumbnail'),
+
 
   // Admin Users Page
   'admin.users.pageTitle': placeholder('Manage Users'),
@@ -633,3 +636,5 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   return translation;
 }
 
+
+    
