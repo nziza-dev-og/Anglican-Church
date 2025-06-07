@@ -212,6 +212,8 @@ export const translations: Translations = {
   'dashboard.admin.choirs.description': placeholder('Update general information about choirs.'),
   'dashboard.admin.unions.title': placeholder('Manage Unions Info'),
   'dashboard.admin.unions.description': placeholder('Update general information about unions.'),
+  'dashboard.admin.contactMessages.title': placeholder('Manage Contact Messages'),
+  'dashboard.admin.contactMessages.description': placeholder('View and respond to user inquiries.'),
   'dashboard.admin.settings.title': placeholder('App Settings'),
   'dashboard.admin.settings.description': placeholder('Configure application-wide settings.'),
   'dashboard.pastor.members.title': placeholder('View Members List'),
@@ -622,6 +624,7 @@ export const translations: Translations = {
   'sidebar.manageCeremonies': placeholder('Manage Ceremonies'),
   'sidebar.manageChoirsInfo': placeholder('Manage Choirs Info'),
   'sidebar.manageUnionsInfo': placeholder('Manage Unions Info'),
+  'sidebar.manageContactMessages': placeholder('Contact Messages'),
   'sidebar.viewMembers': placeholder('View Members'),
   'sidebar.manageActivities': placeholder('Manage Activities'),
   'sidebar.manageMyChoir': placeholder('Manage My Choir'),
@@ -643,6 +646,36 @@ export const translations: Translations = {
   'chat.loadingUsers': placeholder('Loading users...'),
   'chat.noMessagesYetWith': placeholder('No messages yet with {{userName}}. Start the conversation!'),
 
+  // Admin Contact Messages Page
+  'admin.contactMessages.pageTitle': placeholder('Contact Messages'),
+  'admin.contactMessages.pageSubtitle': placeholder('View and manage messages submitted through the contact form.'),
+  'admin.contactMessages.listTitle': placeholder('Received Messages'),
+  'admin.contactMessages.total': placeholder('Total Messages:'),
+  'admin.contactMessages.empty.title': placeholder('No Contact Messages'),
+  'admin.contactMessages.empty.description': placeholder('There are no messages submitted through the contact form yet.'),
+  'admin.contactMessages.table.name': placeholder('Name'),
+  'admin.contactMessages.table.email': placeholder('Email'),
+  'admin.contactMessages.table.subject': placeholder('Subject'),
+  'admin.contactMessages.table.date': placeholder('Submitted At'),
+  'admin.contactMessages.table.status': placeholder('Status'),
+  'admin.contactMessages.table.actions': placeholder('Actions'),
+  'admin.contactMessages.status.read': placeholder('Read'),
+  'admin.contactMessages.status.unread': placeholder('Unread'),
+  'admin.contactMessages.actions.view': placeholder('View Message'),
+  'admin.contactMessages.actions.reply': placeholder('Reply via Email'),
+  'admin.contactMessages.actions.markAsRead': placeholder('Mark as Read'),
+  'admin.contactMessages.actions.markAsUnread': placeholder('Mark as Unread'),
+  'admin.contactMessages.actions.delete': placeholder('Delete Message'),
+  'admin.contactMessages.delete.confirm.title': placeholder('Confirm Deletion'),
+  'admin.contactMessages.delete.confirm.description': placeholder('Are you sure you want to delete this message with subject'), // subject and sender will be appended
+  'admin.contactMessages.viewMessage.title': placeholder('Message Details'),
+  'admin.contactMessages.toast.markedRead': placeholder('Message marked as read.'),
+  'admin.contactMessages.toast.markedUnread': placeholder('Message marked as unread.'),
+  'admin.contactMessages.toast.deleted': placeholder('Message deleted successfully.'),
+  'admin.contactMessages.toast.error.fetch': placeholder('Could not fetch messages.'),
+  'admin.contactMessages.toast.error.update': placeholder('Could not update message status.'),
+  'admin.contactMessages.toast.error.delete': placeholder('Could not delete message.'),
+
 
 };
 
@@ -663,4 +696,3 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   }
   return translation;
 }
-

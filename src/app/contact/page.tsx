@@ -49,13 +49,14 @@ const ContactPage = () => {
   const onSubmit: SubmitHandler<ContactFormInputs> = async (data) => {
     setIsSubmitting(true);
     try {
-      const contactMessageData: Omit<ContactMessage, 'id' | 'isRead'> = {
+      const contactMessageData: Omit<ContactMessage, 'id'> = {
         name: data.name,
         email: data.email,
         subject: data.subject,
         message: data.message,
         submittedAt: serverTimestamp() as any, // Firestore will convert this
         userId: user?.uid || undefined,
+        isRead: false, // Default to unread
       };
       await addDoc(collection(db, CONTACT_MESSAGES_COLLECTION), contactMessageData);
       

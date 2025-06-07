@@ -15,16 +15,16 @@ import {
   ShieldCheck,
   Settings,
   Music,
-  Building, // Consider changing if a better icon for Unions exists or using Handshake
-  Handshake, // Keeping for Unions for now
+  Handshake,
   Briefcase,
+  MailWarning, // Using MailWarning for Contact Messages
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface NavItem {
   href: string;
-  labelKey: string; // Changed to labelKey for translation
+  labelKey: string; 
   icon: ReactNode;
   roles?: string[]; 
 }
@@ -39,9 +39,10 @@ const allNavItems: NavItem[] = [
   { href: "/dashboard/admin/videos", labelKey: "sidebar.manageVideos", icon: <Video />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { href: "/dashboard/admin/ceremonies", labelKey: "sidebar.manageCeremonies", icon: <ShieldCheck />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { href: "/dashboard/admin/choirs", labelKey: "sidebar.manageChoirsInfo", icon: <Music />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
-  { href: "/dashboard/admin/unions", labelKey: "sidebar.manageUnionsInfo", icon: <Handshake />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] }, // Using Handshake for Unions
+  { href: "/dashboard/admin/unions", labelKey: "sidebar.manageUnionsInfo", icon: <Handshake />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
+  { href: "/dashboard/admin/contact-messages", labelKey: "sidebar.manageContactMessages", icon: <MailWarning />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   // Pastor/Diacon Section
-  { href: "/dashboard/members", labelKey: "sidebar.viewMembers", icon: <Users />, roles: [USER_ROLES.CHIEF_PASTOR, USER_ROLES.PASTOR, USER_ROLES.DIACON, USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] }, // Expanded roles based on existing code
+  { href: "/dashboard/members", labelKey: "sidebar.viewMembers", icon: <Users />, roles: [USER_ROLES.CHIEF_PASTOR, USER_ROLES.PASTOR, USER_ROLES.DIACON, USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { href: "/dashboard/activities", labelKey: "sidebar.manageActivities", icon: <Briefcase />, roles: [USER_ROLES.CHIEF_PASTOR, USER_ROLES.PASTOR, USER_ROLES.DIACON] },
   // Choir Admin Section
   { href: "/dashboard/choir-admin/manage", labelKey: "sidebar.manageMyChoir", icon: <Music />, roles: [USER_ROLES.CHOIR_ADMIN] },
@@ -61,6 +62,12 @@ export default function DashboardSidebar() {
   const visibleNavItems = allNavItems.filter(item => {
     if (!item.roles) return true; 
     return item.roles.includes(userProfile.role);
+  }).sort((a, b) => { // Optional: sort to keep admin items grouped
+    const aIsAdmin = a.href.startsWith('/dashboard/admin/');
+    const bIsAdmin = b.href.startsWith('/dashboard/admin/');
+    if (aIsAdmin && !bIsAdmin) return -1;
+    if (!aIsAdmin && bIsAdmin) return 1;
+    return 0;
   });
 
   return (

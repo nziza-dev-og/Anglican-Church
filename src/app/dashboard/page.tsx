@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { USER_ROLES } from "@/lib/constants";
-import { Briefcase, BookOpen, CalendarCheck2, Handshake, LayoutDashboard, Music, Settings, ShieldCheck, User, Users, Video } from "lucide-react";
+import { Briefcase, BookOpen, CalendarCheck2, Handshake, LayoutDashboard, Music, Settings, ShieldCheck, User, Users, Video, MailWarning } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -27,6 +27,7 @@ const dashboardSections: DashboardSection[] = [
   { titleKey: "dashboard.admin.ceremonies.title", descriptionKey: "dashboard.admin.ceremonies.description", link: "/dashboard/admin/ceremonies", icon: <ShieldCheck className="h-6 w-6 text-accent" />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { titleKey: "dashboard.admin.choirs.title", descriptionKey: "dashboard.admin.choirs.description", link: "/dashboard/admin/choirs", icon: <Music className="h-6 w-6 text-accent" />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { titleKey: "dashboard.admin.unions.title", descriptionKey: "dashboard.admin.unions.description", link: "/dashboard/admin/unions", icon: <Handshake className="h-6 w-6 text-accent" />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
+  { titleKey: "dashboard.admin.contactMessages.title", descriptionKey: "dashboard.admin.contactMessages.description", link: "/dashboard/admin/contact-messages", icon: <MailWarning className="h-6 w-6 text-accent" />, roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { titleKey: "dashboard.admin.settings.title", descriptionKey: "dashboard.admin.settings.description", link: "/dashboard/settings", icon: <Settings className="h-6 w-6 text-accent" />, roles: [USER_ROLES.SUPER_ADMIN] },
   { titleKey: "dashboard.pastor.members.title", descriptionKey: "dashboard.pastor.members.description", link: "/dashboard/members", icon: <Users className="h-6 w-6 text-accent" />, roles: [USER_ROLES.CHIEF_PASTOR, USER_ROLES.PASTOR, USER_ROLES.DIACON, USER_ROLES.SUPER_ADMIN, USER_ROLES.CHURCH_ADMIN] },
   { titleKey: "dashboard.pastor.activities.title", descriptionKey: "dashboard.pastor.activities.description", link: "/dashboard/activities", icon: <Briefcase className="h-6 w-6 text-accent" />, roles: [USER_ROLES.CHIEF_PASTOR, USER_ROLES.PASTOR, USER_ROLES.DIACON] },
@@ -54,7 +55,7 @@ export default function DashboardPage() {
     <div>
       <PageTitle
         title={`${t('dashboard.welcome')} ${userProfile.displayName || 'User'}!`}
-        subtitle={`${t('dashboard.overviewSubtitle')} ${userProfile.role}`}
+        subtitle={`${t('dashboard.overviewSubtitle')} ${t(`userRoles.${userProfile.role.toLowerCase().replace(/\s+/g, '')}`)}`}
       />
       {availableSections.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
