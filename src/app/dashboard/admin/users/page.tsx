@@ -56,7 +56,7 @@ export default function AdminUsersPage() {
     if (currentUserProfile && (currentUserProfile.role === USER_ROLES.CHURCH_ADMIN || currentUserProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchUsers();
     }
-  }, [currentUserProfile, t]); // Added t
+  }, [currentUserProfile, t]);
   
   const handleRoleChange = async (userId: string, newRole: UserProfile["role"]) => {
     if (currentUserProfile?.role !== USER_ROLES.SUPER_ADMIN && newRole === USER_ROLES.SUPER_ADMIN) {
@@ -176,3 +176,4 @@ export default function AdminUsersPage() {
     </div>
   );
 }
+

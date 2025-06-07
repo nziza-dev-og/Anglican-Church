@@ -7,7 +7,7 @@ import { USERS_COLLECTION, USER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/firebase";
 import type { UserProfile } from "@/types";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react"; // Added useMemo
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,26 +26,22 @@ export default function ViewMembersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  const authorizedRoles = [
+  const authorizedRoles = useMemo(() => [ // useMemo for stable reference
     USER_ROLES.CHIEF_PASTOR,
     USER_ROLES.PASTOR,
     USER_ROLES.DIACON,
     USER_ROLES.SUPER_ADMIN,
     USER_ROLES.CHURCH_ADMIN
-  ];
+  ], []);
 
   useEffect(() => {
     if (!authLoading && userProfile && !authorizedRoles.includes(userProfile.role)) {
       router.push("/dashboard");
+      setLoadingData(false); // Ensure loading stops if redirected early
+      return;
     }
-  }, [userProfile, authLoading, router, authorizedRoles]);
 
-  useEffect(() => {
     const fetchUsers = async () => {
-      if (!userProfile || !authorizedRoles.includes(userProfile.role)) {
-        setLoadingData(false);
-        return;
-      }
       setLoadingData(true);
       try {
         const usersQuery = query(collection(db, USERS_COLLECTION), orderBy("displayName", "asc"));
@@ -63,17 +59,24 @@ export default function ViewMembersPage() {
       }
     };
 
-    if (!authLoading && userProfile) {
+    if (!authLoading && userProfile && authorizedRoles.includes(userProfile.role)) {
       fetchUsers();
+    } else if (!authLoading && !userProfile) {
+      // User not logged in or profile not loaded, stop loading
+      setLoadingData(false);
     }
-  }, [userProfile, authLoading, t, toast]); // Added t and toast to dependency array
+    // If userProfile is loaded but not authorized, the initial redirect handles it.
+    // setLoadingData(false) is called in the redirect block or finally block of fetchUsers.
+
+  }, [userProfile, authLoading, t, toast, authorizedRoles, router]);
+
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
-  if (authLoading || (!userProfile && !authLoading)) {
+  if (authLoading || (!userProfile && !authLoading && loadingData)) { // Adjusted loading condition
     return (
       <div>
         <PageTitle title={t('dashboard.members.pageTitle')} />
@@ -138,7 +141,7 @@ export default function ViewMembersPage() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                         <Badge variant={user.role === USER_ROLES.SUPER_ADMIN ? "destructive" : "secondary"}>
-                           {t(`userRoles.${user.role.toLowerCase().replace(/\s+/g, '')}` as any, user.role)}
+                           {t(`userRoles.${user.role.toLowerCase().replace(/\s+/g, '')}`)}
                         </Badge>
                     </TableCell>
                   </TableRow>
@@ -151,3 +154,4 @@ export default function ViewMembersPage() {
     </div>
   );
 }
+

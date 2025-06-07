@@ -179,6 +179,7 @@ export const translations: Translations = {
   // User Roles
   'userRoles.superadmin': { en: 'Super Admin', rw: 'Umunyamabanga Mukuru Cyane', fr: 'Super Administrateur', sw: 'Msimamizi Mkuu', es: 'Super Administrador', de: 'Super-Administrator' },
   'userRoles.churchadmin': { en: 'Church Admin', rw: 'Umunyamabanga w\'Itorero', fr: 'Administrateur de l\'Église', sw: 'Msimamizi wa Kanisa', es: 'Administrador de la Iglesia', de: 'Kirchenadministrator' },
+  'userRoles.admin': { en: 'Admin', rw: 'Admin', fr: 'Admin', sw: 'Admin', es: 'Admin', de: 'Admin' }, // Added for "Admin" role
   'userRoles.pastor': { en: 'Pastor', rw: 'Pasitoro', fr: 'Pasteur', sw: 'Mchungaji', es: 'Pastor', de: 'Pastor' },
   'userRoles.chiefpastor': { en: 'Chief Pastor', rw: 'Pasitoro Mukuru', fr: 'Pasteur Principal', sw: 'Mchungaji Mkuu', es: 'Pastor Principal', de: 'Hauptpastor' },
   'userRoles.diacon': { en: 'Diacon', rw: 'Umudiyakoni', fr: 'Diacre', sw: 'Shemasi', es: 'Diácono', de: 'Diakon' },
@@ -636,7 +637,7 @@ export const translations: Translations = {
   'chat.notAuthenticated': placeholder('You must be logged in to access the chat.'),
   'chat.noMessages': placeholder('No messages yet. Be the first to say something!'),
   'chat.selectUserPrompt': placeholder('Select a user to start chatting.'),
-  'chat.chattingWith': placeholder('Chatting with {{userName}}'), // Not used directly yet, but good for future
+  'chat.chattingWith': placeholder('Chatting with {{userName}}'),
   'chat.searchUsersPlaceholder': placeholder('Search users...'),
   'chat.noUsersFound': placeholder('No users found.'),
   'chat.loadingUsers': placeholder('Loading users...'),
@@ -662,3 +663,4 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   }
   return translation;
 }
+
