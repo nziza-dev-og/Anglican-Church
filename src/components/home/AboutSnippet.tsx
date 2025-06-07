@@ -41,7 +41,7 @@ export default function AboutSnippet() {
           </div>
           <div className="relative h-80 md:h-96 rounded-lg overflow-hidden shadow-xl animate-fade-in animation-delay-200">
             <Image
-              src="https://placehold.co/600x400.png"
+              src="https://i.pinimg.com/736x/37/c7/59/37c759e8e8ca7ee48fd6e97a9b2fa26a.jpg"
               alt={t('home.aboutSnippet.title')}
               layout="fill"
               objectFit="cover"
