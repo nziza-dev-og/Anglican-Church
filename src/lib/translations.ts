@@ -144,8 +144,10 @@ export const translations: Translations = {
   'about.mission.description': placeholder("To make disciples of Jesus Christ by proclaiming the Gospel, nurturing believers in their faith journey, and serving our community with love and compassion, reflecting God's kingdom on earth."),
   'about.vision.title': placeholder('Vision'),
   'about.vision.description': placeholder("To be a transformative, Christ-centered community that shines as a beacon of hope, faith, and love in Rubavu, empowering individuals to live purposeful lives according to God's will."),
-  'about.leadership.title': placeholder('Leadership'),
-  'about.leadership.description': placeholder("Our church is led by a dedicated team of pastors, deacons, and lay leaders committed to serving the congregation and upholding our church's values. (More details about specific leaders can be added here or on a separate leadership page if needed)."),
+  'about.leadership.title': placeholder('Leadership Team'),
+  'about.leadership.description': placeholder("Our church is led by a dedicated team of pastors and deacons committed to serving the congregation and upholding our church's values."),
+  'about.leadership.empty': placeholder('Leadership information is currently being updated. Please check back soon.'),
+
 
   // Contact Page
   'contact.title': placeholder('Contact Us'),
