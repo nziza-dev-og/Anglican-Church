@@ -40,7 +40,7 @@ export default function UnionInfoForm({ onUnionSaved, editingUnion }: UnionInfoF
   const [loading, setLoading] = useState(false);
 
   const unionInfoFormSchema = z.object({
-    name: z.enum(UNION_TYPES, { required_error: t('unionInfoForm.name.label') }), // Needs specific error
+    name: z.enum(UNION_TYPES, { required_error: t('unionInfoForm.name.error') }), 
     description: z.string().optional(),
     adminUids: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()).filter(Boolean) : []),
   });
@@ -50,7 +50,7 @@ export default function UnionInfoForm({ onUnionSaved, editingUnion }: UnionInfoF
   const form = useForm<UnionInfoFormValues>({
     resolver: zodResolver(unionInfoFormSchema),
     defaultValues: {
-      name: "Mothers Union", // This will be the actual string value
+      name: "Mothers Union", 
       description: "",
       adminUids: [],
     },
@@ -96,7 +96,7 @@ export default function UnionInfoForm({ onUnionSaved, editingUnion }: UnionInfoF
       form.reset({ name: "Mothers Union", description: "", adminUids: []});
     } catch (error) {
       console.error("Error saving union info:", error);
-      toast({ title: t('unionInfoForm.toast.failed.title'), variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('unionInfoForm.toast.failed.description'), variant: "destructive" });
     } finally {
       setLoading(false);
     }

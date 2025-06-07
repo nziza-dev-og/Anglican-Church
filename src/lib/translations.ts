@@ -107,7 +107,7 @@ export const translations: Translations = {
   'general.submit': placeholder('Submit'),
   'general.back': placeholder('Back'),
   'general.optional': placeholder('Optional'),
-  'general.error.mustBeLoggedIn': placeholder('You must be logged in.'),
+  'general.error.mustBeLoggedIn': placeholder('You must be logged in to perform this action.'),
   'general.error.unexpected': placeholder('An unexpected error occurred. Please try again.'),
   'general.success': placeholder('Success!'),
   'general.failure': placeholder('Failed'),
@@ -117,6 +117,7 @@ export const translations: Translations = {
   'general.error.title': placeholder('Error'),
   'general.confirmation.title': placeholder('Are you sure?'),
   'general.confirmation.cannotBeUndone': placeholder('This action cannot be undone.'),
+  'general.learnMore': placeholder('Learn More'),
 
   // About Page
   'about.title': placeholder('About Us'),
@@ -243,7 +244,7 @@ export const translations: Translations = {
   'admin.books.form.addTitle': placeholder('Add a New Book'),
   'admin.books.empty.title': placeholder('No Books in Library'),
   'admin.books.empty.description': placeholder('Click "Add New Book" to get started.'),
-  'admin.books.delete.confirm.title': placeholder('Are you sure?'),
+  'admin.books.delete.confirm.title': placeholder('Confirm Deletion'),
   'admin.books.delete.confirm.description': placeholder('This action cannot be undone. This will permanently delete the book'), // Book title will be appended
   'admin.books.toast.deleted.title': placeholder('Book Deleted'),
   'admin.books.toast.deleted.description': placeholder('has been removed.'), // Book title will be prepended
@@ -401,6 +402,7 @@ export const translations: Translations = {
   'eventForm.date.label': placeholder('Event Date'),
   'eventForm.date.pick': placeholder('Pick a date'),
   'eventForm.time.label': placeholder('Event Time (HH:MM)'),
+  'eventForm.time.error': placeholder('Please enter a valid time in HH:MM format.'),
   'eventForm.location.label': placeholder('Location (Optional)'),
   'eventForm.location.placeholder': placeholder('Church Main Hall'),
   'eventForm.imageUrl.label': placeholder('Image URL (Optional)'),
@@ -474,10 +476,12 @@ export const translations: Translations = {
   'ceremonyForm.title.placeholder': placeholder("e.g., John & Jane's Wedding"),
   'ceremonyForm.type.label': placeholder('Ceremony Type'),
   'ceremonyForm.type.placeholder': placeholder('e.g., Wedding, Baptism, Confirmation'),
+  'ceremonyForm.type.error': placeholder('Type must be at least 3 characters.'),
   'ceremonyForm.description.label': placeholder('Description'),
   'ceremonyForm.description.placeholder': placeholder('Details about the ceremony...'),
   'ceremonyForm.date.label': placeholder('Ceremony Date'),
   'ceremonyForm.date.pick': placeholder('Pick a date'),
+  'ceremonyForm.date.error': placeholder('A valid date is required.'),
   'ceremonyForm.imageUrls.label': placeholder('Image URLs (Optional)'),
   'ceremonyForm.imageUrls.placeholder': placeholder('https://example.com/image.jpg'),
   'ceremonyForm.imageUrls.add': placeholder('Add Image URL'),
@@ -489,6 +493,7 @@ export const translations: Translations = {
   'ceremonyForm.toast.added.title': placeholder('Ceremony Added'),
   'ceremonyForm.toast.added.description': placeholder('has been successfully added.'), // Ceremony title prepended
   'ceremonyForm.toast.failed.title': placeholder('Failed to Save Ceremony'),
+  'ceremonyForm.toast.failed.description': placeholder('Could not save the ceremony. Please try again.'),
   'ceremonyForm.button.add': placeholder('Add Ceremony'),
   'ceremonyForm.button.save': placeholder('Save Changes'),
 
@@ -511,8 +516,10 @@ export const translations: Translations = {
   // ChoirInfoForm Component
   'choirInfoForm.name.label': placeholder('Choir Name'),
   'choirInfoForm.name.placeholder': placeholder('Glorious Singers'),
+  'choirInfoForm.name.error': placeholder('Choir name must be at least 3 characters.'),
   'choirInfoForm.chamber.label': placeholder('Chamber'),
   'choirInfoForm.chamber.placeholder': placeholder('Main Church / Youth / Sunday School'),
+  'choirInfoForm.chamber.error': placeholder('Chamber name must be at least 2 characters.'),
   'choirInfoForm.description.label': placeholder('Description (Optional)'),
   'choirInfoForm.description.placeholder': placeholder('About the choir...'),
   'choirInfoForm.adminUids.label': placeholder('Choir Admin User IDs (Optional)'),
@@ -523,6 +530,7 @@ export const translations: Translations = {
   'choirInfoForm.toast.added.title': placeholder('Choir Info Added'),
   'choirInfoForm.toast.added.description': placeholder('has been successfully added.'), // Choir name prepended
   'choirInfoForm.toast.failed.title': placeholder('Failed to Save Choir Info'),
+  'choirInfoForm.toast.failed.description': placeholder('Could not save choir information. Please try again.'),
   'choirInfoForm.button.add': placeholder('Add Choir'),
   'choirInfoForm.button.save': placeholder('Save Changes'),
 
@@ -543,6 +551,7 @@ export const translations: Translations = {
   // UnionInfoForm Component
   'unionInfoForm.name.label': placeholder('Union Name/Type'),
   'unionInfoForm.name.selectPlaceholder': placeholder('Select a union type'),
+  'unionInfoForm.name.error': placeholder('Please select a union type.'),
   'unionInfoForm.description.label': placeholder('Description (Optional)'),
   'unionInfoForm.description.placeholder': placeholder('About the union...'),
   'unionInfoForm.adminUids.label': placeholder('Union Admin User IDs (Optional)'),
@@ -553,6 +562,7 @@ export const translations: Translations = {
   'unionInfoForm.toast.added.title': placeholder('Union Info Added'),
   'unionInfoForm.toast.added.description': placeholder('has been successfully added.'), // Union name prepended
   'unionInfoForm.toast.failed.title': placeholder('Failed to Save Union Info'),
+  'unionInfoForm.toast.failed.description': placeholder('Could not save union information. Please try again.'),
   'unionInfoForm.button.add': placeholder('Add Union'),
   'unionInfoForm.button.save': placeholder('Save Changes'),
 
@@ -622,3 +632,4 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   }
   return translation;
 }
+

@@ -37,8 +37,8 @@ export default function ChoirInfoForm({ onChoirSaved, editingChoir }: ChoirInfoF
   const [loading, setLoading] = useState(false);
 
   const choirInfoFormSchema = z.object({
-    name: z.string().min(3, { message: t('bookForm.title.error') }), // Re-use
-    chamber: z.string().min(2, { message: t('choirInfoForm.chamber.label') }), // Needs specific error
+    name: z.string().min(3, { message: t('choirInfoForm.name.error') }),
+    chamber: z.string().min(2, { message: t('choirInfoForm.chamber.error') }),
     description: z.string().optional(),
     adminUids: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()).filter(Boolean) : []), 
   });
@@ -97,7 +97,7 @@ export default function ChoirInfoForm({ onChoirSaved, editingChoir }: ChoirInfoF
       form.reset({ name: "", chamber: "", description: "", adminUids: []});
     } catch (error) {
       console.error("Error saving choir info:", error);
-      toast({ title: t('choirInfoForm.toast.failed.title'), variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('choirInfoForm.toast.failed.description'), variant: "destructive" });
     } finally {
       setLoading(false);
     }

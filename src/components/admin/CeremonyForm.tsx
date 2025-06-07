@@ -41,12 +41,12 @@ export default function CeremonyForm({ onCeremonySaved, editingCeremony }: Cerem
   const [loading, setLoading] = useState(false);
 
   const ceremonyFormSchema = z.object({
-    title: z.string().min(3, { message: t('bookForm.title.error') }), // Re-use
-    type: z.string().min(3, { message: t('ceremonyForm.type.label') }), // Needs specific error
-    description: z.string().min(10, { message: t('contact.form.message.error') }), // Re-use
-    date: z.date({ required_error: t('ceremonyForm.date.label') }), // Needs specific error
-    imageUrls: z.array(z.object({ value: z.string().url({ message: t('contact.form.email.error')}) })).optional(), // Re-use
-    videoUrls: z.array(z.object({ value: z.string().url({ message: t('contact.form.email.error')}) })).optional(), // Re-use
+    title: z.string().min(3, { message: t('bookForm.title.error') }),
+    type: z.string().min(3, { message: t('ceremonyForm.type.error') }),
+    description: z.string().min(10, { message: t('contact.form.message.error') }),
+    date: z.date({ required_error: t('ceremonyForm.date.error') }),
+    imageUrls: z.array(z.object({ value: z.string().url({ message: t('contact.form.email.error')}) })).optional(),
+    videoUrls: z.array(z.object({ value: z.string().url({ message: t('contact.form.email.error')}) })).optional(),
   });
   
   type CeremonyFormValues = z.infer<typeof ceremonyFormSchema>;
@@ -118,7 +118,7 @@ export default function CeremonyForm({ onCeremonySaved, editingCeremony }: Cerem
       form.reset({ title: "", type: "", description: "", date: new Date(), imageUrls: [], videoUrls: []});
     } catch (error) {
       console.error("Error saving ceremony:", error);
-      toast({ title: t('ceremonyForm.toast.failed.title'), variant: "destructive" });
+      toast({ title: t('general.error.title'), description: t('ceremonyForm.toast.failed.description'), variant: "destructive" });
     } finally {
       setLoading(false);
     }

@@ -69,7 +69,7 @@ export default function AdminChoirsPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchChoirs();
     }
-  }, [userProfile, t, toast]); // Added t and toast
+  }, [userProfile, t, toast]); 
 
   const handleChoirSaved = (savedChoir: Choir) => {
     if (editingChoir) {

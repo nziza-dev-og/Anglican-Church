@@ -8,8 +8,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
-// TODO: Implement actual member list view.
-// For now, this is a placeholder page for Pastors/Diacons/SuperAdmins.
 
 export default function ViewMembersPage() {
   const { userProfile, loading: authLoading } = useAuth();
@@ -28,7 +26,7 @@ export default function ViewMembersPage() {
     if (!authLoading && userProfile && !authorizedRoles.includes(userProfile.role)) {
       router.push("/dashboard");
     }
-  }, [userProfile, authLoading, router]);
+  }, [userProfile, authLoading, router, authorizedRoles]); // Added authorizedRoles to dependency array
 
   if (authLoading || (!userProfile && !authLoading)) {
     return (

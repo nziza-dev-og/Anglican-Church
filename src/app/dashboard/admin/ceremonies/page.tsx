@@ -31,7 +31,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 
 const formatDate = (timestamp: Timestamp | Date) => {
   const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); // Consider making locale dynamic
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); 
 };
 
 export default function AdminCeremoniesPage() {
@@ -74,7 +74,7 @@ export default function AdminCeremoniesPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchCeremonies();
     }
-  }, [userProfile, t, toast]); // Added t and toast
+  }, [userProfile, t, toast]);
 
   const handleCeremonySaved = (savedCeremony: Ceremony) => {
     if (editingCeremony) {

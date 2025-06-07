@@ -83,7 +83,7 @@ export default function AdminEventsPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchEvents();
     }
-  }, [userProfile, t, toast]); // Added t and toast
+  }, [userProfile, t, toast]);
 
   const handleEventSaved = (savedEvent: ChurchEvent) => {
      if (editingEvent) {

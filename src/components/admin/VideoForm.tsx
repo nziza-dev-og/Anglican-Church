@@ -37,10 +37,10 @@ export default function VideoForm({ onVideoSaved, editingVideo }: VideoFormProps
   const [loading, setLoading] = useState(false);
 
   const videoFormSchema = z.object({
-    title: z.string().min(3, { message: t('bookForm.title.error') }), // Re-use
+    title: z.string().min(3, { message: t('bookForm.title.error') }),
     description: z.string().optional(),
-    videoUrl: z.string().url({ message: t('contact.form.email.error') }), // Re-use
-    thumbnailUrl: z.string().url({ message: t('contact.form.email.error') }).optional().or(z.literal('')), // Re-use
+    videoUrl: z.string().url({ message: t('contact.form.email.error') }),
+    thumbnailUrl: z.string().url({ message: t('contact.form.email.error') }).optional().or(z.literal('')),
     category: z.string().optional(),
   });
   

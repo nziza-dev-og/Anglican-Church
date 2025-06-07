@@ -69,7 +69,7 @@ export default function AdminUnionsPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchUnions();
     }
-  }, [userProfile, t, toast]); // Added t and toast
+  }, [userProfile, t, toast]); 
 
   const handleUnionSaved = (savedUnion: ChurchUnion) => {
     if (editingUnion) {

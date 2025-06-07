@@ -2,7 +2,8 @@
 "use client";
 import AppLayout from "@/components/layout/AppLayout";
 import PageTitle from "@/components/shared/PageTitle";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UNIONS_COLLECTION } from "@/lib/constants";
 import { db } from "@/lib/firebase";

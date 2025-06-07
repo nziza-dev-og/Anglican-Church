@@ -8,8 +8,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
-// TODO: Implement actual application settings.
-// For now, this is a placeholder page for Super Admins.
 
 export default function AppSettingsPage() {
   const { userProfile, loading: authLoading } = useAuth();

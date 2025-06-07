@@ -8,8 +8,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
-// TODO: Implement actual choir management (members, choir-specific events).
-// For now, this is a placeholder page for Choir Admins.
 
 export default function ManageChoirPage() {
   const { userProfile, loading: authLoading } = useAuth();

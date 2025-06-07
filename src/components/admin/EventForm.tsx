@@ -41,12 +41,12 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
   const [loading, setLoading] = useState(false);
 
   const eventFormSchema = z.object({
-    title: z.string().min(3, { message: t('bookForm.title.error') }), // Re-using a generic min length error
-    description: z.string().min(10, { message: t('contact.form.message.error') }), // Re-using
-    date: z.date({ required_error: t('eventForm.date.label') }), // Needs specific error message
-    time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: t('eventForm.time.label') }), // Needs specific error
+    title: z.string().min(3, { message: t('bookForm.title.error') }),
+    description: z.string().min(10, { message: t('contact.form.message.error') }),
+    date: z.date({ required_error: t('eventForm.date.pick') }), 
+    time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: t('eventForm.time.error') }),
     location: z.string().optional(),
-    imageUrl: z.string().url({ message: t('contact.form.email.error') }).optional().or(z.literal('')), // Re-using
+    imageUrl: z.string().url({ message: t('contact.form.email.error') }).optional().or(z.literal('')),
   });
   
   type EventFormValues = z.infer<typeof eventFormSchema>;

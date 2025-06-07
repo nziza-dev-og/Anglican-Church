@@ -69,7 +69,7 @@ export default function AdminVideosPage() {
     if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
       fetchVideos();
     }
-  }, [userProfile, t, toast]); // Added t and toast
+  }, [userProfile, t, toast]); 
 
   const handleVideoSaved = (savedVideo: Video) => {
     if (editingVideo) {
