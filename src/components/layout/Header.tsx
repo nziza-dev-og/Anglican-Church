@@ -1,5 +1,6 @@
 
 "use client";
+import React from 'react'; // Added React import
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogOut, UserCircle, Settings, LayoutDashboard, Menu } from 'lucide-react';
