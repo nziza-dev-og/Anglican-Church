@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from '@/components/shared/Logo';
 import { useAuth } from '@/hooks/useAuth';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"; // Added SheetHeader, SheetTitle
 import { SidebarNav } from './SidebarNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -61,9 +61,11 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
-              <div className="p-4 border-b border-sidebar-border">
-                <Logo textSize="text-2xl" />
-              </div>
+              <SheetHeader className="p-4 border-b border-sidebar-border">
+                <SheetTitle>
+                  <Logo textSize="text-2xl" />
+                </SheetTitle>
+              </SheetHeader>
               <SidebarNav 
                 items={NAV_ITEMS.map(item => ({ ...item, label: t(item.labelKey) }))} 
                 isMobile={true} 
@@ -91,11 +93,11 @@ export default function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Globe className="h-5 w-5" />
-                <span className="sr-only">Select Language</span>
+                <span className="sr-only">{t('header.selectLanguage')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Languages</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('header.languages')}</DropdownMenuLabel>
               <DropdownMenuRadioGroup value={currentLocale} onValueChange={(value) => setCurrentLocale(value as Locale)}>
                 {availableLocales.map((locale) => (
                   <DropdownMenuRadioItem key={locale.code} value={locale.code}>
@@ -125,7 +127,7 @@ export default function Header() {
                       {userProfile?.email}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground pt-1">
-                      Role: {userProfile?.role}
+                      {t('header.userRole')} {userProfile?.role}
                     </p>
                   </div>
                 </DropdownMenuLabel>
