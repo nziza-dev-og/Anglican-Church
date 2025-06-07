@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from '@/components/shared/Logo';
 import { useAuth } from '@/hooks/useAuth';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"; // Added SheetHeader, SheetTitle
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SidebarNav } from './SidebarNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -61,9 +61,10 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
-              <SheetHeader className="p-4 border-b border-sidebar-border">
-                <SheetTitle>
-                  <Logo textSize="text-2xl" />
+              <SheetHeader className="p-4 border-b border-sidebar-border flex flex-col items-start">
+                <Logo textSize="text-2xl" className="mb-2"/>
+                <SheetTitle className="text-lg font-semibold text-sidebar-foreground self-start">
+                  {t('sidebar.menuTitle')}
                 </SheetTitle>
               </SheetHeader>
               <SidebarNav 
@@ -122,12 +123,12 @@ export default function Header() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userProfile?.displayName || 'User'}</p>
+                    <p className="text-sm font-medium leading-none">{userProfile?.displayName || t('general.notAvailableShort')}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {userProfile?.email}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground pt-1">
-                      {t('header.userRole')} {userProfile?.role}
+                      {t('header.userRole')} {userProfile?.role ? t(`userRoles.${userProfile.role.toLowerCase().replace(/\s+/g, '')}`) : t('general.notAvailableShort')}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -168,3 +169,4 @@ export default function Header() {
     </header>
   );
 }
+
