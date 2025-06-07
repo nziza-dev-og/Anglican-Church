@@ -15,10 +15,17 @@ import { Loader2, Mail, MapPinIcon, Phone } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { CONTACT_MESSAGES_COLLECTION } from "@/lib/constants";
+import { useAuth } from "@/hooks/useAuth";
+import type { ContactMessage } from "@/types";
+
 
 const ContactPage = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const contactFormSchema = z.object({
@@ -41,15 +48,32 @@ const ContactPage = () => {
 
   const onSubmit: SubmitHandler<ContactFormInputs> = async (data) => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log("Contact form data:", data);
-    toast({
-      title: t('contact.form.toast.success.title'),
-      description: t('contact.form.toast.success.description'),
-    });
-    reset();
-    setIsSubmitting(false);
+    try {
+      const contactMessageData: Omit<ContactMessage, 'id' | 'isRead'> = {
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+        submittedAt: serverTimestamp() as any, // Firestore will convert this
+        userId: user?.uid || undefined,
+      };
+      await addDoc(collection(db, CONTACT_MESSAGES_COLLECTION), contactMessageData);
+      
+      toast({
+        title: t('contact.form.toast.success.titleDb'),
+        description: t('contact.form.toast.success.descriptionDb'),
+      });
+      reset();
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: t('general.error.title'),
+        description: t('contact.form.toast.error.description'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

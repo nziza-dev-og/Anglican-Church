@@ -1,3 +1,4 @@
+
 import type { UserRole } from '@/types';
 
 export const USER_ROLES = {
@@ -26,6 +27,7 @@ export const UNIONS_COLLECTION = 'unions';
 export const UNION_MEMBERS_COLLECTION = 'unionMembers';
 export const CEREMONIES_COLLECTION = 'ceremonies';
 export const CHAT_MESSAGES_COLLECTION = 'chatMessages';
+export const CONTACT_MESSAGES_COLLECTION = 'contactMessages';
 
 // These are default codes. In a real app, these should be securely managed,
 // possibly fetched from a secure configuration or Firestore itself.

@@ -20,6 +20,7 @@ import {
   Video,
   ShieldCheck,
   Mails, // For Contact
+  MessageSquare, // For Chat
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,15 +57,16 @@ export default function Header() {
   const { t } = useTranslation();
 
   const NAV_ITEMS: NavLink[] = [
-    { labelKey: 'nav.home', href: '/', icon: <Home /> },
-    { labelKey: 'nav.about', href: '/about', icon: <Info /> },
-    { labelKey: 'nav.events', href: '/events', icon: <CalendarDays /> },
-    { labelKey: 'nav.books', href: '/books', icon: <BookOpen /> },
-    { labelKey: 'nav.choirs', href: '/choirs', icon: <Music /> },
-    { labelKey: 'nav.unions', href: '/unions', icon: <Handshake /> },
-    { labelKey: 'nav.videos', href: '/videos', icon: <Video /> },
-    { labelKey: 'nav.ceremonies', href: '/ceremonies', icon: <ShieldCheck /> },
-    { labelKey: 'nav.contact', href: '/contact', icon: <Mails /> },
+    { labelKey: 'nav.home', href: '/', icon: <Home className="h-5 w-5" /> },
+    { labelKey: 'nav.about', href: '/about', icon: <Info className="h-5 w-5" /> },
+    { labelKey: 'nav.events', href: '/events', icon: <CalendarDays className="h-5 w-5" /> },
+    { labelKey: 'nav.books', href: '/books', icon: <BookOpen className="h-5 w-5" /> },
+    { labelKey: 'nav.choirs', href: '/choirs', icon: <Music className="h-5 w-5" /> },
+    { labelKey: 'nav.unions', href: '/unions', icon: <Handshake className="h-5 w-5" /> },
+    { labelKey: 'nav.videos', href: '/videos', icon: <Video className="h-5 w-5" /> },
+    { labelKey: 'nav.ceremonies', href: '/ceremonies', icon: <ShieldCheck className="h-5 w-5" /> },
+    { labelKey: 'nav.contact', href: '/contact', icon: <Mails className="h-5 w-5" /> },
+    { labelKey: 'nav.chat', href: '/chat', icon: <MessageSquare className="h-5 w-5" /> },
   ];
   
   const getInitials = (name?: string | null) => {
@@ -86,8 +88,7 @@ export default function Header() {
             <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground">
                <SheetHeader className="p-4 border-b border-sidebar-border flex flex-row items-center justify-between">
                 <Logo textSize="text-2xl"/>
-                {/* SheetClose is automatically added by SheetContent, explicit title is good for accessibility */}
-                <SheetTitle className="sr-only">{t('sidebar.menuTitle')}</SheetTitle> 
+                <SheetTitle>{t('header.mobileMenuTitle')}</SheetTitle> 
               </SheetHeader>
               <SidebarNav 
                 items={NAV_ITEMS.map(item => ({ ...item, label: t(item.labelKey), icon: item.icon }))} 

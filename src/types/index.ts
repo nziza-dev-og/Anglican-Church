@@ -117,11 +117,23 @@ export interface ChatMessage {
   id?: string;
   roomId: string; // Can be event ID, choir ID, union ID, or 'general'
   senderUid: string;
-  senderName: string;
+  senderName: string | null; // Ensure senderName can be null
   senderPhotoURL?: string | null;
   text: string;
   timestamp: Timestamp;
 }
+
+export interface ContactMessage {
+  id?: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  submittedAt: Timestamp;
+  userId?: string; // Optional: if a logged-in user submits
+  isRead?: boolean; // For admin tracking
+}
+
 
 export interface SecretCode {
   id: UserRole; // The role this code grants

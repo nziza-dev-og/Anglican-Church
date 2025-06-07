@@ -47,6 +47,8 @@ export const translations: Translations = {
   'nav.ceremonies': { en: 'Ceremonies', rw: 'Imigenzo', fr: 'Cérémonies', sw: 'Sherehe', es: 'Ceremonias', de: 'Zeremonien' },
   'nav.contact': { en: 'Contact', rw: 'Twandikire', fr: 'Contact', sw: 'Mawasiliano', es: 'Contacto', de: 'Kontakt' },
   'nav.events': { en: 'Events', rw: 'Ibyabaye', fr: 'Événements', sw: 'Matukio', es: 'Eventos', de: 'Veranstaltungen'},
+  'nav.chat': { en: 'Chat', rw: 'Ikiganiro', fr: 'Chat', sw: 'Soga', es: 'Chat', de: 'Plaudern'},
+
 
   // Auth
   'auth.login': { en: 'Login', rw: 'Injira', fr: 'Connexion', sw: 'Ingia', es: 'Iniciar Sesión', de: 'Anmelden' },
@@ -119,6 +121,8 @@ export const translations: Translations = {
   'general.confirmation.title': placeholder('Are you sure?'),
   'general.confirmation.cannotBeUndone': placeholder('This action cannot be undone.'),
   'general.learnMore': placeholder('Learn More'),
+  'general.anonymousUser': placeholder('Anonymous User'),
+
 
   // About Page
   'about.title': placeholder('About Us'),
@@ -160,8 +164,9 @@ export const translations: Translations = {
   'contact.form.message.placeholder': placeholder('Your message here...'),
   'contact.form.message.error': placeholder('Message must be at least 10 characters.'),
   'contact.form.button.send': placeholder('Send Message'),
-  'contact.form.toast.success.title': placeholder('Message Sent!'),
-  'contact.form.toast.success.description': placeholder("Thank you for contacting us. We'll get back to you soon."),
+  'contact.form.toast.success.titleDb': placeholder('Message Sent!'),
+  'contact.form.toast.success.descriptionDb': placeholder("Thank you! Your message has been submitted for review."),
+  'contact.form.toast.error.description': placeholder('Could not send your message. Please try again later.'),
   'contact.info.title': placeholder('Our Information'),
   'contact.info.address.title': placeholder('Address'),
   'contact.info.address.value': placeholder('123 Church Street, Rubavu, Rwanda'),
@@ -616,6 +621,16 @@ export const translations: Translations = {
   'sidebar.manageMyUnion': placeholder('Manage My Union'),
   'sidebar.appSettings': placeholder('App Settings'),
 
+  // Chat Page
+  'chat.title': placeholder('Live Chat'),
+  'chat.subtitle': placeholder('Connect and discuss with other members in real-time.'),
+  'chat.sendMessagePlaceholder': placeholder('Type your message...'),
+  'chat.sendButton': placeholder('Send'),
+  'chat.loadingMessages': placeholder('Loading messages...'),
+  'chat.notAuthenticated': placeholder('You must be logged in to access the chat.'),
+  'chat.noMessages': placeholder('No messages yet. Be the first to say something!'),
+
+
 };
 
 export function translate(key: string, locale: Locale, fallbackLocale: Locale = 'en'): string {
@@ -635,6 +650,3 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   }
   return translation;
 }
-
-
-    
