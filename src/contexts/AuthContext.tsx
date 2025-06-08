@@ -4,7 +4,7 @@
 import type { User as FirebaseUser } from 'firebase/auth';
 import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, Timestamp, onSnapshot } from 'firebase/firestore';
-import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from 'react';
 import { auth, db } from '@/lib/firebase';
 import type { UserProfile, UserRole } from '@/types';
 import { USERS_COLLECTION, USER_ROLES } from '@/lib/constants';
@@ -22,6 +22,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to compare relevant parts of user profiles
+const areProfilesEffectivelyEqual = (profile1: UserProfile | null, profile2: UserProfile | null): boolean => {
+  if (!profile1 && !profile2) return true;
+  if (!profile1 || !profile2) return false;
+  return (
+    profile1.uid === profile2.uid &&
+    profile1.displayName === profile2.displayName &&
+    profile1.email === profile2.email &&
+    profile1.photoURL === profile2.photoURL &&
+    profile1.role === profile2.role &&
+    JSON.stringify(profile1.interests) === JSON.stringify(profile2.interests) && // Simple array compare
+    (profile1.createdAt && profile2.createdAt ? profile1.createdAt.isEqual(profile2.createdAt) : profile1.createdAt === profile2.createdAt)
+  );
+};
+
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -35,50 +51,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(firebaseUser);
         const userDocRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
         
-        // Set up a snapshot listener for real-time profile updates
         const unsubSnapshot = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
-            setUserProfile(docSnap.data() as UserProfile);
+            const newProfileData = docSnap.data() as UserProfile;
+            setUserProfile(currentProfile => {
+              if (areProfilesEffectivelyEqual(currentProfile, newProfileData)) {
+                return currentProfile; // Avoid creating a new reference if data is effectively the same
+              }
+              return newProfileData;
+            });
           } else {
-            // This case might happen if user is created but profile doc is not yet ready
-            // Or if user was deleted from Firestore but still authenticated
-            // For now, we assume profile should exist if user is authenticated
             console.warn("User document not found for UID:", firebaseUser.uid);
-            // Potentially create a basic profile here if it's a new registration flow.
-            // For now, let's assume it's handled during registration.
             setUserProfile(null); 
           }
         });
         
         setLoading(false);
-        return () => unsubSnapshot(); // Cleanup snapshot listener
+        return () => unsubSnapshot(); 
       } else {
         setUser(null);
         setUserProfile(null);
         setLoading(false);
-        // Redirect to login if not on public pages
-        const publicPaths = ['/auth/login', '/auth/register', '/', '/about', '/contact', '/events', '/books', '/choirs', '/unions', '/videos', '/ceremonies'];
+        const publicPaths = ['/auth/login', '/auth/register', '/', '/about', '/contact', '/events', '/books', '/choirs', '/unions', '/videos', '/ceremonies', '/leadership'];
         const isPublicEventDetail = pathname.startsWith('/events/');
 
         if (!publicPaths.some(p => pathname.startsWith(p)) && !isPublicEventDetail && !pathname.startsWith('/_next')) {
-         // router.push('/auth/login');
+         // router.push('/auth/login'); // This was commented out, keeping it as is.
         }
       }
     });
 
     return () => unsubscribe();
-  }, [pathname, router]);
+  }, [pathname, router]); // Keep router in deps if its stability is ensured by Next.js
   
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await firebaseSignOut(auth);
-      setUser(null);
-      setUserProfile(null);
+      // setUser(null) and setUserProfile(null) will be handled by onAuthStateChanged
       router.push('/auth/login');
     } catch (error) {
       console.error("Error signing out: ", error);
     }
-  };
+  }, [router]);
 
   const isAdmin = userProfile?.role === USER_ROLES.CHURCH_ADMIN || userProfile?.role === USER_ROLES.SUPER_ADMIN;
   const isChoirAdmin = userProfile?.role === USER_ROLES.CHOIR_ADMIN;
