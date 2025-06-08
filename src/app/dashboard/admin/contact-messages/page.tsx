@@ -13,8 +13,8 @@ import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Button, buttonVariants } from "@/components/ui/button"; // Ensure buttonVariants is imported
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDescriptionComponent, DialogTrigger, DialogFooter } from "@/components/ui/dialog"; // Aliased DialogDescription
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Eye, Mail, Trash2, CheckCircle, XCircle, Loader2, MessageSquare } from "lucide-react";
@@ -34,54 +34,59 @@ export default function AdminContactMessagesPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && userProfile &&
-        (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
-      router.push("/dashboard");
+  const fetchMessages = useCallback(async () => {
+    let isMounted = true; // Flag to prevent state updates if component unmounts
+    if (isMounted) setLoadingData(true);
+    try {
+      const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
+      const querySnapshot = await getDocs(messagesQuery);
+      const fetchedMessages: ContactMessage[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedMessages.push({ id: doc.id, ...doc.data() } as ContactMessage);
+      });
+      if (isMounted) {
+        setMessages(fetchedMessages);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      if (isMounted) {
+        toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
+      }
+    } finally {
+      if (isMounted) {
+        setLoadingData(false);
+      }
     }
-  }, [userProfile, authLoading, router]);
+    return () => { isMounted = false; }; // Cleanup function
+  }, [t, toast]);
 
   useEffect(() => {
-    let isMounted = true;
+    if (authLoading) {
+      setLoadingData(true);
+      return;
+    }
 
-    const loadMessages = async () => {
-      if (!authLoading && userProfile) {
-        if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
-          if (isMounted) setLoadingData(true);
-          try {
-            const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
-            const querySnapshot = await getDocs(messagesQuery);
-            const fetchedMessages: ContactMessage[] = [];
-            querySnapshot.forEach((doc) => {
-              fetchedMessages.push({ id: doc.id, ...doc.data() } as ContactMessage);
-            });
-            if (isMounted) {
-              setMessages(fetchedMessages);
-            }
-          } catch (error) {
-            console.error("Error fetching messages:", error);
-            if (isMounted) {
-              toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
-            }
-          } finally {
-            if (isMounted) {
-              setLoadingData(false);
-            }
-          }
-        } else {
-           if (isMounted) setLoadingData(false); 
-        }
-      } else if (!authLoading && !userProfile) {
-         if (isMounted) setLoadingData(false); 
+    if (!userProfile) {
+      setLoadingData(false);
+      // router.push('/auth/login'); // Or rely on AuthContext/DashboardLayout
+      return;
+    }
+    const isAuthorized = userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN;
+
+    if (!isAuthorized) {
+      router.push("/dashboard");
+      setLoadingData(false);
+      return;
+    }
+    
+    const cleanupFetch = fetchMessages(); 
+    return () => {
+      if (typeof cleanupFetch === 'function') {
+        cleanupFetch();
       }
     };
 
-    loadMessages();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [userProfile, authLoading, t, toast]); 
+  }, [authLoading, userProfile, router, fetchMessages]); 
   
   const handleToggleReadStatus = async (message: ContactMessage) => {
     if (!message.id) return;
@@ -121,11 +126,12 @@ export default function AdminContactMessagesPage() {
     setSelectedMessage(message);
     setIsViewDialogOpen(true);
     if (!message.isRead && message.id) {
+        // Ensure isRead is false before toggling to true (so it marks as read)
         handleToggleReadStatus({...message, isRead: false}); 
     }
   };
 
-  const formatDate = (timestamp: Timestamp | Date | undefined | string | number) => {
+  const formatDate = (timestamp: Timestamp | Date | undefined | string | number): string => {
     if (!timestamp) return t('general.notAvailableShort');
     try {
       const date = timestamp instanceof Timestamp 
@@ -133,17 +139,17 @@ export default function AdminContactMessagesPage() {
         : (typeof timestamp === 'string' || typeof timestamp === 'number' ? new Date(timestamp) : timestamp);
       
       if (!(date instanceof Date) || isNaN(date.getTime())) {
-        console.warn("Invalid date object received by formatDate:", timestamp);
-        return t('general.error.title') + ' ' + t('eventForm.date.label'); // Or a more specific error message
+        // console.warn("Invalid date object received by formatDate:", timestamp);
+        return 'Invalid Date'; // Or a more specific translated error message
       }
       return format(date, 'PPP p');
     } catch (e) {
-      console.error("Error in formatDate:", e, "Input:", timestamp);
-      return t('general.error.title') + ' ' + t('eventForm.date.label');
+      // console.error("Error in formatDate:", e, "Input:", timestamp);
+      return 'Date Error'; // Or a more specific translated error message
     }
   };
-
-  if (authLoading || (!userProfile && !authLoading && loadingData)) { 
+  
+  if (authLoading && loadingData) { 
     return (
       <div>
         <PageTitle title={t('admin.contactMessages.pageTitle')} />
@@ -193,7 +199,7 @@ export default function AdminContactMessagesPage() {
                     rowClass = 'font-semibold bg-secondary/20 hover:bg-secondary/30';
                   }
                   return (
-                    <TableRow key={msg.id || Math.random()} className={rowClass} >
+                    <TableRow key={msg.id!} className={rowClass} > {/* Use msg.id! assuming it's always present */}
                       <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>{msg.name || t('general.notAvailableShort')}</TableCell>
                       <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden md:table-cell">{msg.email || t('general.notAvailableShort')}</TableCell>
                       <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="max-w-xs truncate">{msg.subject || t('general.notAvailableShort')}</TableCell>
@@ -253,9 +259,9 @@ export default function AdminContactMessagesPage() {
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{t('admin.contactMessages.viewMessage.title')}: {selectedMessage.subject || t('general.notAvailableShort')}</DialogTitle>
-              <DialogDescription>
+              <DialogDescriptionComponent> {/* Ensure this uses the aliased import */}
                 {t('general.by')} {selectedMessage.name || t('general.notAvailableShort')} ({selectedMessage.email || t('general.notAvailableShort')}) - {formatDate(selectedMessage.submittedAt)}
-              </DialogDescription>
+              </DialogDescriptionComponent>
             </DialogHeader>
             <ScrollArea className="max-h-[60vh] my-4 pr-6">
               <p className="whitespace-pre-wrap text-sm">{selectedMessage.message || t('general.noDescription')}</p>
@@ -276,4 +282,3 @@ export default function AdminContactMessagesPage() {
     </div>
   );
 }
-

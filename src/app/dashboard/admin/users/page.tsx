@@ -7,7 +7,7 @@ import { USERS_COLLECTION, USER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/firebase";
 import type { UserProfile } from "@/types";
 import { collection, getDocs, query, orderBy, doc, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -27,14 +27,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  useEffect(() => {
-    if (!authLoading && currentUserProfile &&
-        (currentUserProfile.role !== USER_ROLES.CHURCH_ADMIN && currentUserProfile.role !== USER_ROLES.SUPER_ADMIN)) {
-      router.push("/dashboard");
-    }
-  }, [currentUserProfile, authLoading, router]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoadingData(true);
     try {
       const usersQuery = query(collection(db, USERS_COLLECTION), orderBy("displayName", "asc"));
@@ -50,13 +43,31 @@ export default function AdminUsersPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [t, toast]);
 
   useEffect(() => {
-    if (currentUserProfile && (currentUserProfile.role === USER_ROLES.CHURCH_ADMIN || currentUserProfile.role === USER_ROLES.SUPER_ADMIN)) {
-      fetchUsers();
+    if (authLoading) {
+      setLoadingData(true);
+      return;
     }
-  }, [currentUserProfile, t]);
+
+    if (!currentUserProfile) {
+      setLoadingData(false);
+      // router.push('/auth/login'); // Or rely on AuthContext/DashboardLayout to redirect
+      return;
+    }
+
+    const isAuthorized = currentUserProfile.role === USER_ROLES.CHURCH_ADMIN || currentUserProfile.role === USER_ROLES.SUPER_ADMIN;
+
+    if (!isAuthorized) {
+      router.push("/dashboard");
+      setLoadingData(false);
+      return;
+    }
+    
+    fetchUsers();
+
+  }, [authLoading, currentUserProfile, router, fetchUsers]);
   
   const handleRoleChange = async (userId: string, newRole: UserProfile["role"]) => {
     if (currentUserProfile?.role !== USER_ROLES.SUPER_ADMIN && newRole === USER_ROLES.SUPER_ADMIN) {
@@ -65,6 +76,7 @@ export default function AdminUsersPage() {
     }
     if (userId === currentUserProfile?.uid && newRole !== currentUserProfile?.role) {
         toast({ title: t('general.failure'), description: t('admin.users.cannotChangeOwnRole'), variant: "destructive" });
+        // Re-fetch to reset the Select component to the actual current role
         setTimeout(fetchUsers, 100); 
         return;
     }
@@ -77,6 +89,7 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error("Error updating role:", error);
       toast({ title: t('general.error.title'), description: t('admin.users.toast.error.updateRole'), variant: "destructive" });
+      // Re-fetch to ensure UI consistency after error
       setTimeout(fetchUsers, 100); 
     }
   };
@@ -86,8 +99,7 @@ export default function AdminUsersPage() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
-
-  if (authLoading || (!currentUserProfile && !authLoading)) {
+  if (authLoading && loadingData) {
     return (
       <div>
         <PageTitle title={t('admin.users.pageTitle')} />
@@ -176,4 +188,3 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-

@@ -11,7 +11,7 @@ import { collection, getDocs, query, orderBy, doc, deleteDoc } from "firebase/fi
 import { PlayCircle, PlusCircle, Trash2, Edit, VideoIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import VideoForm from "@/components/admin/VideoForm";
@@ -40,14 +40,7 @@ export default function AdminVideosPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && userProfile &&
-        (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
-      router.push("/dashboard");
-    }
-  }, [userProfile, authLoading, router]);
-
-  const fetchVideos = async () => {
+  const fetchVideos = useCallback(async () => {
     setLoadingData(true);
     try {
       const videosQuery = query(collection(db, VIDEOS_COLLECTION), orderBy("uploadedAt", "desc"));
@@ -63,13 +56,30 @@ export default function AdminVideosPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [t, toast]);
 
   useEffect(() => {
-    if (userProfile && (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN)) {
-      fetchVideos();
+    if (authLoading) {
+      setLoadingData(true);
+      return;
     }
-  }, [userProfile, t, toast]); 
+
+    if (!userProfile) {
+      setLoadingData(false);
+      return;
+    }
+
+    const isAuthorized = userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN;
+
+    if (!isAuthorized) {
+      router.push("/dashboard");
+      setLoadingData(false);
+      return;
+    }
+    
+    fetchVideos();
+
+  }, [authLoading, userProfile, router, fetchVideos]);
 
   const handleVideoSaved = (savedVideo: Video) => {
     if (editingVideo) {
@@ -104,7 +114,7 @@ export default function AdminVideosPage() {
     }
   };
 
-  if (authLoading || (!userProfile && !authLoading)) {
+  if (authLoading && loadingData) {
     return (
       <div>
         <PageTitle title={t('admin.videos.pageTitle')} />
@@ -214,5 +224,3 @@ export default function AdminVideosPage() {
     </div>
   );
 }
-
-    

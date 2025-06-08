@@ -7,7 +7,7 @@ import { USERS_COLLECTION, USER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/firebase";
 import type { UserProfile } from "@/types";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { useEffect, useState, useMemo } from "react"; // Added useMemo
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,7 +26,7 @@ export default function ViewMembersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  const authorizedRoles = useMemo(() => [ // useMemo for stable reference
+  const authorizedRoles = useMemo(() => [
     USER_ROLES.CHIEF_PASTOR,
     USER_ROLES.PASTOR,
     USER_ROLES.DIACON,
@@ -34,41 +34,47 @@ export default function ViewMembersPage() {
     USER_ROLES.CHURCH_ADMIN
   ], []);
 
+  const fetchUsers = useCallback(async () => {
+    setLoadingData(true);
+    try {
+      const usersQuery = query(collection(db, USERS_COLLECTION), orderBy("displayName", "asc"));
+      const querySnapshot = await getDocs(usersQuery);
+      const fetchedUsers: UserProfile[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedUsers.push({ uid: doc.id, ...doc.data() } as UserProfile);
+      });
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast({ title: t('general.error.title'), description: t('admin.users.toast.error.fetch'), variant: "destructive" });
+    } finally {
+      setLoadingData(false);
+    }
+  }, [t, toast]);
+
   useEffect(() => {
-    if (!authLoading && userProfile && !authorizedRoles.includes(userProfile.role)) {
-      router.push("/dashboard");
-      setLoadingData(false); // Ensure loading stops if redirected early
+    if (authLoading) {
+      setLoadingData(true);
       return;
     }
 
-    const fetchUsers = async () => {
-      setLoadingData(true);
-      try {
-        const usersQuery = query(collection(db, USERS_COLLECTION), orderBy("displayName", "asc"));
-        const querySnapshot = await getDocs(usersQuery);
-        const fetchedUsers: UserProfile[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedUsers.push({ uid: doc.id, ...doc.data() } as UserProfile);
-        });
-        setUsers(fetchedUsers);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        toast({ title: t('general.error.title'), description: t('admin.users.toast.error.fetch'), variant: "destructive" });
-      } finally {
-        setLoadingData(false);
-      }
-    };
-
-    if (!authLoading && userProfile && authorizedRoles.includes(userProfile.role)) {
-      fetchUsers();
-    } else if (!authLoading && !userProfile) {
-      // User not logged in or profile not loaded, stop loading
+    if (!userProfile) {
       setLoadingData(false);
+      // router.push('/auth/login'); // Or rely on AuthContext/DashboardLayout
+      return;
     }
-    // If userProfile is loaded but not authorized, the initial redirect handles it.
-    // setLoadingData(false) is called in the redirect block or finally block of fetchUsers.
+    
+    const isAuthorized = authorizedRoles.includes(userProfile.role);
 
-  }, [userProfile, authLoading, t, toast, authorizedRoles, router]);
+    if (!isAuthorized) {
+      router.push("/dashboard");
+      setLoadingData(false);
+      return;
+    }
+    
+    fetchUsers();
+
+  }, [authLoading, userProfile, router, authorizedRoles, fetchUsers]);
 
 
   const getInitials = (name?: string | null) => {
@@ -76,7 +82,7 @@ export default function ViewMembersPage() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
-  if (authLoading || (!userProfile && !authLoading && loadingData)) { // Adjusted loading condition
+  if (authLoading && loadingData) {
     return (
       <div>
         <PageTitle title={t('dashboard.members.pageTitle')} />
@@ -154,4 +160,3 @@ export default function ViewMembersPage() {
     </div>
   );
 }
-

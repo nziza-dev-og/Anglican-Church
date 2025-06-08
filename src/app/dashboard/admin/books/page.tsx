@@ -11,7 +11,7 @@ import { collection, getDocs, query, orderBy, doc, deleteDoc } from "firebase/fi
 import { BookOpen, Download, PlusCircle, Trash2, Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react"; // Added useCallback
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import BookForm from "@/components/admin/BookForm";
@@ -40,14 +40,6 @@ export default function AdminBooksPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
 
-  // Effect for redirection based on authorization
-  useEffect(() => {
-    if (!authLoading && userProfile && 
-        (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
-      router.push("/dashboard"); 
-    }
-  }, [userProfile, authLoading, router]);
-
   const fetchBooks = useCallback(async () => {
     setLoadingData(true);
     try {
@@ -64,23 +56,33 @@ export default function AdminBooksPage() {
     } finally {
       setLoadingData(false);
     }
-  }, [t, toast]); // Dependencies for fetchBooks
+  }, [t, toast]);
 
-  // Effect for data fetching
   useEffect(() => {
-    if (!authLoading && userProfile) {
-      if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
-        fetchBooks();
-      } else {
-        // Not authorized for this specific data, stop loading
-        setLoadingData(false);
-      }
-    } else if (!authLoading && !userProfile) {
-      // Auth done, but no user profile
-      setLoadingData(false);
+    if (authLoading) {
+      setLoadingData(true); // Keep loadingData true while auth is loading
+      return;
     }
-    // If authLoading is true, effect does nothing and waits for authLoading or userProfile to change
-  }, [userProfile, authLoading, fetchBooks]);
+
+    if (!userProfile) {
+      // No user profile, likely being redirected by AuthContext or DashboardLayout
+      setLoadingData(false);
+      // Optionally, redirect here if not handled by layout: router.push('/auth/login');
+      return;
+    }
+
+    const isAuthorized = userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN;
+
+    if (!isAuthorized) {
+      router.push("/dashboard");
+      setLoadingData(false); // Ensure loading stops if unauthorized and redirecting
+      return;
+    }
+
+    // Authorized, proceed to fetch data
+    fetchBooks();
+
+  }, [authLoading, userProfile, router, fetchBooks]);
 
 
   const handleBookSaved = (savedBook: Book) => {
@@ -116,7 +118,7 @@ export default function AdminBooksPage() {
     }
   };
 
-  if (authLoading) { // Simplified initial loading check
+  if (authLoading && loadingData) { // Show skeleton if auth is loading AND data is still loading
     return (
       <div>
         <PageTitle title={t('admin.books.title')} />
@@ -151,7 +153,7 @@ export default function AdminBooksPage() {
         </Card>
       )}
 
-      {loadingData ? (
+      {loadingData ? ( // This will show if fetchBooks is running
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="overflow-hidden"><Skeleton className="aspect-[3/4] w-full" /></Card>
