@@ -47,6 +47,7 @@ export default function CeremonyDetailPage() {
       const fetchCeremony = async () => {
         setLoading(true);
         setError(null);
+        // setCeremony(null); // Clear previous ceremony data before fetching new one
         try {
           const ceremonyDocRef = doc(db, CEREMONIES_COLLECTION, ceremonyId);
           const docSnap = await getDoc(ceremonyDocRef);
@@ -54,15 +55,22 @@ export default function CeremonyDetailPage() {
             setCeremony({ id: docSnap.id, ...docSnap.data() } as Ceremony);
           } else {
             setError(t('ceremonyDetail.notFound'));
+            setCeremony(null); // Ensure ceremony is null if not found
           }
         } catch (err) {
           console.error("Error fetching ceremony:", err);
           setError(t('ceremonyDetail.failToLoad'));
+          setCeremony(null); // Ensure ceremony is null on error
         } finally {
           setLoading(false);
         }
       };
       fetchCeremony();
+    } else {
+      // Handle case where ceremonyId is not available (e.g., during initial render or if params are weird)
+      setLoading(false);
+      setError(t('ceremonyDetail.failToLoad')); 
+      setCeremony(null);
     }
   }, [ceremonyId, t]);
 
@@ -104,10 +112,15 @@ export default function CeremonyDetailPage() {
   }
 
   if (!ceremony) {
+    // This state can be reached if !loading && !error but ceremony is still null.
+    // This might happen if ceremonyId was initially undefined.
     return (
       <AppLayout>
         <div className="max-w-4xl mx-auto text-center py-10">
           <p className="text-muted-foreground">{t('ceremonyDetail.unavailable')}</p>
+           <Button onClick={() => router.push('/ceremonies')} className="btn-animated mt-4">
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t('ceremonyDetail.backButton')}
+          </Button>
         </div>
       </AppLayout>
     );
@@ -203,3 +216,5 @@ export default function CeremonyDetailPage() {
     </AppLayout>
   );
 }
+
+    

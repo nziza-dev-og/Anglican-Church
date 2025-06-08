@@ -181,7 +181,9 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
                         )}
                       >
                         <>
-                          {field.value ? format(field.value, "PPP") : <span>{t('eventForm.date.pick')}</span>}
+                           <span> {/* Wrap the text/placeholder */}
+                            {field.value ? format(field.value, "PPP") : t('eventForm.date.pick')}
+                          </span>
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </>
                       </Button>
@@ -250,3 +252,5 @@ export default function EventForm({ onEventSaved, editingEvent }: EventFormProps
     </Form>
   );
 }
+
+    

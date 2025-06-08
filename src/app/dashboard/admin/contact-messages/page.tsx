@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CONTACT_MESSAGES_COLLECTION, USER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/firebase";
 import type { ContactMessage } from "@/types";
-import { collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc, Timestamp, onSnapshot } from "firebase/firestore";
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -34,40 +34,15 @@ export default function AdminContactMessagesPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const fetchMessages = useCallback(async () => {
-    let isMounted = true; 
-    setLoadingData(true);
-    try {
-      const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
-      const querySnapshot = await getDocs(messagesQuery);
-      const fetchedMessages: ContactMessage[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedMessages.push({ id: doc.id, ...doc.data() } as ContactMessage);
-      });
-      if (isMounted) {
-        setMessages(fetchedMessages);
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      if (isMounted) {
-        toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
-        setMessages([]);
-      }
-    } finally {
-      if (isMounted) {
-        setLoadingData(false);
-      }
-    }
-    return () => { isMounted = false; }; 
-  }, [t, toast]);
-
   useEffect(() => {
     if (authLoading) {
+      setLoadingData(true); // Still waiting for auth info
       return;
     }
 
     if (!userProfile) {
-      setLoadingData(false);
+      setLoadingData(false); // No user, nothing to load for this admin page
+      // router.push('/auth/login'); // Should be handled by DashboardLayout
       return;
     }
     const isAuthorized = userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN;
@@ -78,14 +53,26 @@ export default function AdminContactMessagesPage() {
       return;
     }
     
-    const cleanupFetch = fetchMessages(); 
-    return () => {
-      if (typeof cleanupFetch === 'function') {
-        cleanupFetch();
-      }
-    };
+    setLoadingData(true); // Start loading page-specific data
+    const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
+    
+    const unsubscribe = onSnapshot(messagesQuery, (querySnapshot) => {
+      const fetchedMessages: ContactMessage[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedMessages.push({ id: doc.id, ...doc.data() } as ContactMessage);
+      });
+      setMessages(fetchedMessages);
+      setLoadingData(false);
+    }, (error) => {
+      console.error("Error fetching messages:", error);
+      toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
+      setMessages([]); // Clear messages on error
+      setLoadingData(false);
+    });
 
-  }, [authLoading, userProfile, router, fetchMessages]); 
+    return () => unsubscribe(); // Cleanup listener on component unmount
+
+  }, [authLoading, userProfile, router, t, toast]); // Dependencies for the effect
   
   const handleToggleReadStatus = async (message: ContactMessage) => {
     if (!message.id) return;
@@ -93,9 +80,7 @@ export default function AdminContactMessagesPage() {
     try {
       const messageDocRef = doc(db, CONTACT_MESSAGES_COLLECTION, message.id);
       await updateDoc(messageDocRef, { isRead: !message.isRead });
-      setMessages(prevMessages => prevMessages.map(msg => 
-        msg.id === message.id ? { ...msg, isRead: !message.isRead } : msg
-      ));
+      // setMessages will be updated by the onSnapshot listener
       toast({ title: t('general.success'), description: message.isRead ? t('admin.contactMessages.toast.markedUnread') : t('admin.contactMessages.toast.markedRead') });
     } catch (error) {
       console.error("Error updating message status:", error);
@@ -109,7 +94,7 @@ export default function AdminContactMessagesPage() {
     setActionLoading(`delete-${messageId}`);
     try {
       await deleteDoc(doc(db, CONTACT_MESSAGES_COLLECTION, messageId));
-      setMessages(prevMessages => prevMessages.filter(msg => msg.id !== messageId));
+      // setMessages will be updated by the onSnapshot listener
       toast({ title: t('general.success'), description: t('admin.contactMessages.toast.deleted') });
     } catch (error) {
       console.error("Error deleting message:", error);
@@ -125,7 +110,13 @@ export default function AdminContactMessagesPage() {
     setSelectedMessage(message);
     setIsViewDialogOpen(true);
     if (!message.isRead && message.id) {
-        handleToggleReadStatus({...message, isRead: false}); 
+        // Optimistically mark as read in UI, backend will confirm
+        // This specific update will be handled by the Firestore listener if successful
+        const messageDocRef = doc(db, CONTACT_MESSAGES_COLLECTION, message.id);
+        updateDoc(messageDocRef, { isRead: true }).catch(error => {
+            console.error("Error marking message as read on view:", error);
+            // Potentially revert UI change or notify user
+        });
     }
   };
 
@@ -153,6 +144,16 @@ export default function AdminContactMessagesPage() {
     }
   };
   
+  // DashboardLayout handles global authLoading. This page shows skeletons if its specific data is loading.
+  if (authLoading) { 
+    return (
+      <div>
+        <PageTitle title={t('admin.contactMessages.pageTitle')} />
+        <Card><CardHeader><Skeleton className="h-8 w-48" /></CardHeader><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageTitle
@@ -277,3 +278,5 @@ export default function AdminContactMessagesPage() {
     </div>
   );
 }
+
+    

@@ -147,11 +147,9 @@ export default function CeremonyForm({ onCeremonySaved, editingCeremony }: Cerem
                       )}
                     >
                       <>
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>{t('ceremonyForm.date.pick')}</span>
-                        )}
+                        <span> {/* Wrap the text/placeholder */}
+                          {field.value ? format(field.value, "PPP") : t('ceremonyForm.date.pick')}
+                        </span>
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </>
                     </Button>
@@ -207,3 +205,5 @@ export default function CeremonyForm({ onCeremonySaved, editingCeremony }: Cerem
     </Form>
   );
 }
+
+    
