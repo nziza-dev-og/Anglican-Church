@@ -378,6 +378,18 @@ export const translations: Translations = {
   'eventDetail.notFound.description': placeholder('The event you are looking for might have been removed or the link is incorrect.'),
   'eventDetail.unavailable': placeholder('Event details are unavailable.'),
 
+  // Ceremony Detail Page (/ceremonies/[id])
+  'ceremonyDetail.backButton': placeholder('Back to Ceremonies'),
+  'ceremonyDetail.notFound': placeholder('Ceremony not found.'),
+  'ceremonyDetail.failToLoad': placeholder('Failed to load ceremony details.'),
+  'ceremonyDetail.notFound.description': placeholder('The ceremony you are looking for might have been removed or the link is incorrect.'),
+  'ceremonyDetail.unavailable': placeholder('Ceremony details are unavailable.'),
+  'ceremonyDetail.imagesTitle': placeholder('Images'),
+  'ceremonyDetail.videosTitle': placeholder('Videos'),
+  'ceremonyDetail.watchVideoLink': placeholder('Watch Video'),
+  'ceremonyDetail.noMedia': placeholder('No images or videos available for this ceremony.'),
+
+
   // Unions Page (Public)
   'unions.title': placeholder('Church Unions'),
   'unions.subtitle': placeholder('Learn about our Mothers Union, Fathers Union, and other fellowship groups.'),
@@ -726,4 +738,3 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   }
   return translation;
 }
-

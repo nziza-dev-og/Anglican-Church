@@ -68,6 +68,9 @@ export default function CeremoniesPage() {
                 <Skeleton className="h-4 w-full mb-1" />
                 <Skeleton className="h-4 w-2/3" />
               </CardContent>
+              <CardFooter>
+                <Skeleton className="h-10 w-28" />
+              </CardFooter>
             </Card>
           ))}
         </div>
@@ -110,12 +113,11 @@ export default function CeremoniesPage() {
                   {ceremony.description || t('ceremonies.card.noDetails')}
                 </p>
               </CardContent>
-              {/* <CardFooter>
-                 Potentially a link to a detailed ceremony page
-                 <Button asChild variant="link" className="text-primary p-0 hover:text-accent">
+              <CardFooter>
+                <Button asChild className="w-full btn-animated" variant="outline">
                   <Link href={`/ceremonies/${ceremony.id}`}>{t('general.viewDetails')}</Link>
                 </Button>
-              </CardFooter> */}
+              </CardFooter>
             </Card>
           ))}
         </div>
