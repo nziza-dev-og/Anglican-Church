@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CHOIRS_COLLECTION, UNIONS_COLLECTION, USERS_COLLECTION } from "@/lib/constants";
+import { CHOIRS_COLLECTION, UNIONS_COLLECTION, USERS_COLLECTION, USER_ROLES } from "@/lib/constants";
 import { db } from "@/lib/firebase";
 import type { Choir, ChurchUnion, UserProfile, ProcessedLeader } from "@/types";
-import { collection, getDocs, query, where, documentId } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Users, ShieldCheck, Music, Handshake, Phone, Mail, Info } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -18,7 +18,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDescription as DialogDescriptionComponent, // Renamed to avoid conflict with CardDescription
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
@@ -41,35 +41,38 @@ export default function LeadershipPage() {
         const unionsSnapshot = await getDocs(collection(db, UNIONS_COLLECTION));
         const unions = unionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChurchUnion));
 
-        const adminUids = new Set<string>();
-        choirs.forEach(choir => choir.adminUids.forEach(uid => adminUids.add(uid)));
-        unions.forEach(union => union.adminUids.forEach(uid => adminUids.add(uid)));
-        
-        const uniqueAdminUids = Array.from(adminUids);
+        const leadershipRoles = [
+          USER_ROLES.SUPER_ADMIN,
+          USER_ROLES.CHURCH_ADMIN,
+          USER_ROLES.PASTOR,
+          USER_ROLES.CHIEF_PASTOR,
+          USER_ROLES.DIACON,
+          USER_ROLES.CHOIR_ADMIN,
+          USER_ROLES.UNION_ADMIN,
+        ];
 
-        if (uniqueAdminUids.length === 0) {
+        const usersQuery = query(collection(db, USERS_COLLECTION), where("role", "in", leadershipRoles));
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        const fetchedLeaderProfiles: UserProfile[] = [];
+        usersSnapshot.forEach(doc => {
+          fetchedLeaderProfiles.push({ uid: doc.id, ...doc.data() } as UserProfile);
+        });
+
+        if (fetchedLeaderProfiles.length === 0) {
           setLeaders([]);
           setLoading(false);
           return;
         }
-        
-        // Firestore 'in' query has a limit of 30 items per query.
-        // If more than 30 admins, batch the queries.
-        const adminProfiles: UserProfile[] = [];
-        const CHUNK_SIZE = 30;
-        for (let i = 0; i < uniqueAdminUids.length; i += CHUNK_SIZE) {
-            const chunkUids = uniqueAdminUids.slice(i, i + CHUNK_SIZE);
-            if (chunkUids.length > 0) {
-                const usersQuery = query(collection(db, USERS_COLLECTION), where(documentId(), "in", chunkUids));
-                const usersSnapshot = await getDocs(usersQuery);
-                usersSnapshot.forEach(doc => adminProfiles.push({ uid: doc.id, ...doc.data() } as UserProfile));
-            }
-        }
 
-
-        const processedLeaders: ProcessedLeader[] = adminProfiles.map(profile => {
-          const managedChoirs = choirs.filter(choir => choir.adminUids.includes(profile.uid)).map(c => ({id: c.id!, name: c.name}));
-          const managedUnions = unions.filter(union => union.adminUids.includes(profile.uid)).map(u => ({id: u.id!, name: u.name}));
+        const processedLeaders: ProcessedLeader[] = fetchedLeaderProfiles.map(profile => {
+          const managedChoirs = choirs
+            .filter(choir => choir.adminUids.includes(profile.uid))
+            .map(c => ({id: c.id!, name: c.name}));
+          const managedUnions = unions
+            .filter(union => union.adminUids.includes(profile.uid))
+            .map(u => ({id: u.id!, name: u.name}));
+          
           return {
             ...profile,
             managedChoirs,
@@ -117,7 +120,7 @@ export default function LeadershipPage() {
                   <Skeleton className="h-4 w-1/2" />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 pt-2 pb-4">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />
               </CardContent>
@@ -129,7 +132,7 @@ export default function LeadershipPage() {
         </div>
       ) : leaders.length === 0 ? (
         <div className="text-center py-12">
-          <ShieldCheck className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+          <Users className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-foreground mb-2">{t('leadership.page.empty.title')}</h3>
           <p className="text-muted-foreground">{t('leadership.page.empty.description')}</p>
         </div>
@@ -147,7 +150,7 @@ export default function LeadershipPage() {
                   <CardDescription className="text-sm text-muted-foreground">{t(`userRoles.${leader.role.toLowerCase().replace(/\s+/g, '')}`)}</CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="flex-grow space-y-2 text-sm">
+              <CardContent className="flex-grow space-y-2 text-sm pt-2 pb-4">
                 {leader.managedChoirs.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-foreground flex items-center"><Music className="mr-2 h-4 w-4 text-accent" />{t('leadership.page.managesChoirs')}</h4>
@@ -164,7 +167,8 @@ export default function LeadershipPage() {
                     </div>
                   </div>
                 )}
-                {(leader.managedChoirs.length === 0 && leader.managedUnions.length === 0) && (
+                {(leader.managedChoirs.length === 0 && leader.managedUnions.length === 0) && 
+                 (leader.role !== USER_ROLES.CHOIR_ADMIN && leader.role !== USER_ROLES.UNION_ADMIN) && (
                     <p className="text-xs text-muted-foreground italic">{t('leadership.page.noGroupsManaged')}</p>
                 )}
               </CardContent>
@@ -187,13 +191,15 @@ export default function LeadershipPage() {
                 <AvatarFallback className="text-3xl">{getInitials(selectedLeader.displayName)}</AvatarFallback>
               </Avatar>
               <DialogTitle className="text-2xl font-headline">{selectedLeader.displayName}</DialogTitle>
-              <DialogDescription>{t(`userRoles.${selectedLeader.role.toLowerCase().replace(/\s+/g, '')}`)}</DialogDescription>
+              <DialogDescriptionComponent>{t(`userRoles.${selectedLeader.role.toLowerCase().replace(/\s+/g, '')}`)}</DialogDescriptionComponent>
             </DialogHeader>
             <div className="py-4 space-y-3 text-sm">
-              <div className="flex items-center">
-                <Mail className="mr-3 h-5 w-5 text-muted-foreground" />
-                <a href={`mailto:${selectedLeader.email}`} className="text-primary hover:underline">{selectedLeader.email}</a>
-              </div>
+              {selectedLeader.email && (
+                <div className="flex items-center">
+                  <Mail className="mr-3 h-5 w-5 text-muted-foreground" />
+                  <a href={`mailto:${selectedLeader.email}`} className="text-primary hover:underline">{selectedLeader.email}</a>
+                </div>
+              )}
               {selectedLeader.phoneNumber && (
                 <div className="flex items-center">
                   <Phone className="mr-3 h-5 w-5 text-muted-foreground" />
@@ -215,6 +221,10 @@ export default function LeadershipPage() {
                         {selectedLeader.managedUnions.map(union => <Badge key={union.id} variant="outline">{union.name}</Badge>)}
                     </div>
                   </div>
+                )}
+                 {(selectedLeader.managedChoirs.length === 0 && selectedLeader.managedUnions.length === 0) && 
+                   (selectedLeader.role !== USER_ROLES.CHOIR_ADMIN && selectedLeader.role !== USER_ROLES.UNION_ADMIN) && (
+                    <p className="text-xs text-muted-foreground italic">{t('leadership.page.noGroupsManaged')}</p>
                 )}
             </div>
             <DialogFooter>
