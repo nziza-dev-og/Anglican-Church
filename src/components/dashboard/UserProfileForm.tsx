@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { doc, updateDoc } from "firebase/firestore";
@@ -26,44 +27,74 @@ import Image from "next/image";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useTranslation } from "@/hooks/useTranslation";
 
-const profileFormSchema = z.object({
-  displayName: z.string().min(2, { message: "Display name must be at least 2 characters." }), // Message will be translated by form context if needed, or keep generic
-  interests: z.array(z.string()).optional(),
-  photoFile: z.custom<FileList>((val) => val instanceof FileList, "Please upload a file").optional(),
-});
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
-
-export default function UserProfileForm() {
+const UserProfileForm = () => {
   const { userProfile, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPhotoURL, setCurrentPhotoURL] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (userProfile) {
-      setCurrentPhotoURL(userProfile.photoURL || null);
+  const profileFormSchema = z.object({
+    displayName: z.string().min(2, { message: t('auth.displayName.errorMinLength') }),
+    interests: z.array(z.string()).optional(),
+    photoInputMethod: z.enum(["upload", "url"], { required_error: t('dashboard.profile.form.photoInputMethod.error')}),
+    photoFile: z.custom<FileList>((val) => val === undefined || (val instanceof FileList && val.length <= 1), {
+      message: t('dashboard.profile.form.photo.fileError'),
+    }).optional(),
+    photoUrlInput: z.string().optional().transform(value => value === "" ? undefined : value),
+  }).refine(data => {
+    if (data.photoInputMethod === "url" && data.photoUrlInput) {
+      try {
+        new URL(data.photoUrlInput);
+        return true;
+      } catch (_) {
+        return false;
+      }
     }
-  }, [userProfile]);
+    return true;
+  }, {
+    message: t('dashboard.profile.form.photoUrlInput.error'),
+    path: ["photoUrlInput"],
+  });
 
+  type ProfileFormValues = z.infer<typeof profileFormSchema>;
+  
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: "",
       interests: [],
+      photoInputMethod: "upload",
+      photoUrlInput: "",
     },
   });
 
+  const photoInputMethod = form.watch("photoInputMethod");
+  const photoUrlInputValue = form.watch("photoUrlInput");
+
   useEffect(() => {
     if (userProfile) {
+      const initialPhotoInputMethod = userProfile.photoURL && !userProfile.photoURL.includes("firebasestorage.googleapis.com") && !userProfile.photoURL.startsWith("https://placehold.co") ? "url" : "upload";
       form.reset({
         displayName: userProfile.displayName || "",
         interests: userProfile.interests || [],
+        photoInputMethod: initialPhotoInputMethod,
+        photoUrlInput: initialPhotoInputMethod === "url" ? userProfile.photoURL || "" : "",
       });
-      setCurrentPhotoURL(userProfile.photoURL || `https://placehold.co/128x128.png?text=${userProfile.displayName?.charAt(0).toUpperCase() || 'U'}`);
+      setPhotoPreview(userProfile.photoURL || `https://placehold.co/128x128.png?text=${userProfile.displayName?.charAt(0).toUpperCase() || 'U'}`);
     }
   }, [userProfile, form.reset]);
+
+  useEffect(() => {
+    if (photoInputMethod === "url") {
+      if (photoUrlInputValue && z.string().url().safeParse(photoUrlInputValue).success) {
+        setPhotoPreview(photoUrlInputValue);
+      } else if (!photoUrlInputValue) {
+         setPhotoPreview(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
+      }
+    }
+  }, [photoInputMethod, photoUrlInputValue, userProfile]);
 
 
   async function onSubmit(data: ProfileFormValues) {
@@ -73,18 +104,21 @@ export default function UserProfileForm() {
     }
     setIsSubmitting(true);
 
-    try {
-      let finalPhotoURL: string | null;
+    let finalPhotoURL: string | null = userProfile?.photoURL || null;
 
-      if (data.photoFile && data.photoFile.length > 0) {
+    try {
+      if (data.photoInputMethod === "upload" && data.photoFile && data.photoFile.length > 0) {
         const file = data.photoFile[0];
         const storage = getStorage();
-        const photoRef = ref(storage, `profileImages/${user.uid}/${file.name}`);
+        const photoRef = ref(storage, `profileImages/${user.uid}/${Date.now()}_${file.name}`);
         const snapshot = await uploadBytes(photoRef, file);
         finalPhotoURL = await getDownloadURL(snapshot.ref);
-        setCurrentPhotoURL(finalPhotoURL);
-      } else {
-        finalPhotoURL = userProfile?.photoURL || null;
+      } else if (data.photoInputMethod === "url") {
+        if (data.photoUrlInput && z.string().url().safeParse(data.photoUrlInput).success) {
+          finalPhotoURL = data.photoUrlInput;
+        } else if (!data.photoUrlInput) {
+            finalPhotoURL = `https://placehold.co/128x128.png?text=${data.displayName?.charAt(0).toUpperCase() || 'U'}`;
+        }
       }
 
       const userDocRef = doc(db, USERS_COLLECTION, user.uid);
@@ -93,7 +127,8 @@ export default function UserProfileForm() {
         interests: data.interests || [],
         photoURL: finalPhotoURL,
       });
-
+      
+      setPhotoPreview(finalPhotoURL); // Update preview with the final URL after successful save
       toast({ title: t('dashboard.profile.toast.updated.title'), description: t('dashboard.profile.toast.updated.description') });
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -111,14 +146,15 @@ export default function UserProfileForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex flex-col items-center space-y-4">
-            {currentPhotoURL ? (
+            {photoPreview ? (
                 <Image
-                    src={currentPhotoURL}
+                    src={photoPreview}
                     alt={t('dashboard.profile.form.photo.label')}
                     width={128}
                     height={128}
                     className="rounded-full object-cover h-32 w-32 border-2 border-primary shadow-md"
                     data-ai-hint="user profile"
+                    onError={() => setPhotoPreview(`https://placehold.co/128x128.png?text=${form.getValues('displayName')?.charAt(0).toUpperCase() || 'U'}`)}
                 />
             ) : (
               <div 
@@ -130,34 +166,108 @@ export default function UserProfileForm() {
             )}
             <FormField
               control={form.control}
-              name="photoFile"
-              render={({ field: { onChange, value, ...rest } }) => (
-                <FormItem>
-                  <FormLabel>{t('dashboard.profile.form.photo.label')}</FormLabel>
+              name="photoInputMethod"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>{t('dashboard.profile.form.photoInputMethod.label')}</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={(e) => {
-                        onChange(e.target.files);
-                        if (e.target.files && e.target.files[0]) {
-                           const reader = new FileReader();
-                           reader.onload = (event) => {
-                             setCurrentPhotoURL(event.target?.result as string);
-                           };
-                           reader.readAsDataURL(e.target.files[0]);
-                        } else {
-                           setCurrentPhotoURL(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
+                    <RadioGroup
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // When switching methods, reset the other method's input
+                        if (value === "url") {
+                          form.setValue("photoFile", undefined);
+                          if (form.getValues("photoUrlInput") && z.string().url().safeParse(form.getValues("photoUrlInput")).success) {
+                            setPhotoPreview(form.getValues("photoUrlInput")!);
+                          } else {
+                            setPhotoPreview(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
+                          }
+                        } else { // "upload"
+                          form.setValue("photoUrlInput", "");
+                          // Preview for upload is handled by photoFile field's onChange
+                           setPhotoPreview(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
                         }
                       }}
-                      {...rest}
-                    />
+                      defaultValue={field.value}
+                      className="flex space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl><RadioGroupItem value="upload" /></FormControl>
+                        <FormLabel className="font-normal">{t('dashboard.profile.form.photoInputMethod.upload')}</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl><RadioGroupItem value="url" /></FormControl>
+                        <FormLabel className="font-normal">{t('dashboard.profile.form.photoInputMethod.url')}</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
                   </FormControl>
-                  <FormDescription>{t('dashboard.profile.form.photo.description')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {photoInputMethod === "upload" && (
+              <FormField
+                control={form.control}
+                name="photoFile"
+                render={({ field: { onChange, value, ...rest } }) => (
+                  <FormItem>
+                    <FormLabel>{t('dashboard.profile.form.photo.label')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => {
+                          onChange(e.target.files);
+                          if (e.target.files && e.target.files[0]) {
+                             const reader = new FileReader();
+                             reader.onload = (event) => {
+                               setPhotoPreview(event.target?.result as string);
+                             };
+                             reader.readAsDataURL(e.target.files[0]);
+                          } else {
+                             setPhotoPreview(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
+                          }
+                        }}
+                        {...rest}
+                      />
+                    </FormControl>
+                    <FormDescription>{t('dashboard.profile.form.photo.description')}</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {photoInputMethod === "url" && (
+              <FormField
+                control={form.control}
+                name="photoUrlInput"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>{t('dashboard.profile.form.photoUrlInput.label')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="url"
+                        placeholder={t('dashboard.profile.form.photoUrlInput.placeholder')}
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          if (e.target.value && z.string().url().safeParse(e.target.value).success) {
+                            setPhotoPreview(e.target.value);
+                          } else if (!e.target.value) {
+                            setPhotoPreview(userProfile?.photoURL || `https://placehold.co/128x128.png?text=${userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}`);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                     <FormDescription>{t('dashboard.profile.form.photoUrlInput.description')}</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
         </div>
 
         <FormField
@@ -208,3 +318,4 @@ export default function UserProfileForm() {
     </Form>
   );
 }
+export default UserProfileForm;

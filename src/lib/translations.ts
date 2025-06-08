@@ -236,6 +236,15 @@ export const translations: Translations = {
   'dashboard.profile.form.displayName.description': placeholder('This is your public display name.'),
   'dashboard.profile.form.photo.label': placeholder('Profile Picture'),
   'dashboard.profile.form.photo.description': placeholder('Upload a new profile picture (optional).'),
+  'dashboard.profile.form.photo.fileError': placeholder('Please select a valid image file.'),
+  'dashboard.profile.form.photoInputMethod.label': placeholder('Profile Picture Source'),
+  'dashboard.profile.form.photoInputMethod.upload': placeholder('Upload File'),
+  'dashboard.profile.form.photoInputMethod.url': placeholder('Use Image URL'),
+  'dashboard.profile.form.photoInputMethod.error': placeholder('Please select a method for profile picture.'),
+  'dashboard.profile.form.photoUrlInput.label': placeholder('Image URL'),
+  'dashboard.profile.form.photoUrlInput.placeholder': placeholder('https://example.com/your-image.jpg'),
+  'dashboard.profile.form.photoUrlInput.description': placeholder('Enter a direct link to your desired profile image.'),
+  'dashboard.profile.form.photoUrlInput.error': placeholder('Please enter a valid image URL.'),
   'dashboard.profile.form.interests.label': placeholder('Interests'),
   'dashboard.profile.form.interests.description': placeholder('List your interests to help us personalize your experience. Separate interests with a comma.'),
   'dashboard.profile.form.interests.placeholder': placeholder('E.g. Bible Study, Music, Community Service...'),
@@ -717,3 +726,4 @@ export function translate(key: string, locale: Locale, fallbackLocale: Locale = 
   }
   return translation;
 }
+
