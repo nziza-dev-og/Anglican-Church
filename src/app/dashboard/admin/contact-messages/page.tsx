@@ -13,8 +13,8 @@ import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button"; // Ensure buttonVariants is imported
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDescriptionComponent, DialogTrigger, DialogFooter } from "@/components/ui/dialog"; // Aliased DialogDescription
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDescriptionComponent, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Eye, Mail, Trash2, CheckCircle, XCircle, Loader2, MessageSquare } from "lucide-react";
@@ -35,7 +35,7 @@ export default function AdminContactMessagesPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchMessages = useCallback(async () => {
-    let isMounted = true; // Flag to prevent state updates if component unmounts
+    let isMounted = true; 
     if (isMounted) setLoadingData(true);
     try {
       const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
@@ -57,7 +57,7 @@ export default function AdminContactMessagesPage() {
         setLoadingData(false);
       }
     }
-    return () => { isMounted = false; }; // Cleanup function
+    return () => { isMounted = false; }; 
   }, [t, toast]);
 
   useEffect(() => {
@@ -68,7 +68,6 @@ export default function AdminContactMessagesPage() {
 
     if (!userProfile) {
       setLoadingData(false);
-      // router.push('/auth/login'); // Or rely on AuthContext/DashboardLayout
       return;
     }
     const isAuthorized = userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN;
@@ -126,7 +125,6 @@ export default function AdminContactMessagesPage() {
     setSelectedMessage(message);
     setIsViewDialogOpen(true);
     if (!message.isRead && message.id) {
-        // Ensure isRead is false before toggling to true (so it marks as read)
         handleToggleReadStatus({...message, isRead: false}); 
     }
   };
@@ -139,13 +137,11 @@ export default function AdminContactMessagesPage() {
         : (typeof timestamp === 'string' || typeof timestamp === 'number' ? new Date(timestamp) : timestamp);
       
       if (!(date instanceof Date) || isNaN(date.getTime())) {
-        // console.warn("Invalid date object received by formatDate:", timestamp);
-        return 'Invalid Date'; // Or a more specific translated error message
+        return 'Invalid Date'; 
       }
       return format(date, 'PPP p');
     } catch (e) {
-      // console.error("Error in formatDate:", e, "Input:", timestamp);
-      return 'Date Error'; // Or a more specific translated error message
+      return 'Date Error';
     }
   };
   
@@ -199,7 +195,7 @@ export default function AdminContactMessagesPage() {
                     rowClass = 'font-semibold bg-secondary/20 hover:bg-secondary/30';
                   }
                   return (
-                    <TableRow key={msg.id!} className={rowClass} > {/* Use msg.id! assuming it's always present */}
+                    <TableRow key={msg.id!} className={rowClass}>
                       <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}}>{msg.name || t('general.notAvailableShort')}</TableCell>
                       <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="hidden md:table-cell">{msg.email || t('general.notAvailableShort')}</TableCell>
                       <TableCell onClick={() => handleViewMessage(msg)} style={{cursor: 'pointer'}} className="max-w-xs truncate">{msg.subject || t('general.notAvailableShort')}</TableCell>
@@ -259,7 +255,7 @@ export default function AdminContactMessagesPage() {
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{t('admin.contactMessages.viewMessage.title')}: {selectedMessage.subject || t('general.notAvailableShort')}</DialogTitle>
-              <DialogDescriptionComponent> {/* Ensure this uses the aliased import */}
+              <DialogDescriptionComponent>
                 {t('general.by')} {selectedMessage.name || t('general.notAvailableShort')} ({selectedMessage.email || t('general.notAvailableShort')}) - {formatDate(selectedMessage.submittedAt)}
               </DialogDescriptionComponent>
             </DialogHeader>
@@ -282,3 +278,5 @@ export default function AdminContactMessagesPage() {
     </div>
   );
 }
+
+    
