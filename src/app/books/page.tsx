@@ -33,6 +33,7 @@ export default function BooksPage() {
         setBooks(fetchedBooks);
       } catch (error) {
         console.error("Error fetching books:", error);
+        setBooks([]); // Explicitly clear books on error
       } finally {
         setLoading(false);
       }

@@ -47,6 +47,7 @@ export default function EventsPage() {
         setEvents(fetchedEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
+        setEvents([]); // Explicitly clear events on error
       } finally {
         setLoading(false);
       }

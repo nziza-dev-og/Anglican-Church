@@ -53,6 +53,7 @@ export default function AdminBooksPage() {
     } catch (error) {
       console.error("Error fetching books:", error);
       toast({ title: t('general.error.unexpected'), description: t('admin.books.toast.error.fetch'), variant: "destructive" });
+      setBooks([]); // Explicitly clear books on error
     } finally {
       setLoadingData(false);
     }
@@ -60,14 +61,12 @@ export default function AdminBooksPage() {
 
   useEffect(() => {
     if (authLoading) {
-      setLoadingData(true); // Keep loadingData true while auth is loading
+      setLoadingData(true); 
       return;
     }
 
     if (!userProfile) {
-      // No user profile, likely being redirected by AuthContext or DashboardLayout
       setLoadingData(false);
-      // Optionally, redirect here if not handled by layout: router.push('/auth/login');
       return;
     }
 
@@ -75,11 +74,10 @@ export default function AdminBooksPage() {
 
     if (!isAuthorized) {
       router.push("/dashboard");
-      setLoadingData(false); // Ensure loading stops if unauthorized and redirecting
+      setLoadingData(false); 
       return;
     }
 
-    // Authorized, proceed to fetch data
     fetchBooks();
 
   }, [authLoading, userProfile, router, fetchBooks]);
@@ -118,7 +116,7 @@ export default function AdminBooksPage() {
     }
   };
 
-  if (authLoading && loadingData) { // Show skeleton if auth is loading AND data is still loading
+  if (authLoading && loadingData) { 
     return (
       <div>
         <PageTitle title={t('admin.books.title')} />
@@ -153,7 +151,7 @@ export default function AdminBooksPage() {
         </Card>
       )}
 
-      {loadingData ? ( // This will show if fetchBooks is running
+      {loadingData ? ( 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="overflow-hidden"><Skeleton className="aspect-[3/4] w-full" /></Card>
