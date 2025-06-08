@@ -130,7 +130,46 @@ export default function CeremonyForm({ onCeremonySaved, editingCeremony }: Cerem
         <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>{t('ceremonyForm.title.label')}</FormLabel> <FormControl><Input placeholder={t('ceremonyForm.title.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="type" render={({ field }) => ( <FormItem> <FormLabel>{t('ceremonyForm.type.label')}</FormLabel> <FormControl><Input placeholder={t('ceremonyForm.type.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
         <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>{t('ceremonyForm.description.label')}</FormLabel> <FormControl><Textarea placeholder={t('ceremonyForm.description.placeholder')} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-        <FormField control={form.control} name="date" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>{t('ceremonyForm.date.label')}</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")} > {field.value ? format(field.value, "PPP") : <span>{t('ceremonyForm.date.pick')}</span>} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /> </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /> </PopoverContent> </Popover> <FormMessage /> </FormItem> )}/>
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{t('ceremonyForm.date.label')}</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      <>
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>{t('ceremonyForm.date.pick')}</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </>
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <div>
           <FormLabel>{t('ceremonyForm.imageUrls.label')}</FormLabel>
