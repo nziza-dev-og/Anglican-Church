@@ -53,6 +53,7 @@ export default function AdminVideosPage() {
     } catch (error) {
       console.error("Error fetching videos:", error);
       toast({ title: t('general.error.title'), description: t('admin.videos.toast.error.fetch'), variant: "destructive" });
+      setVideos([]);
     } finally {
       setLoadingData(false);
     }
@@ -60,7 +61,6 @@ export default function AdminVideosPage() {
 
   useEffect(() => {
     if (authLoading) {
-      setLoadingData(true);
       return;
     }
 
@@ -78,7 +78,6 @@ export default function AdminVideosPage() {
     }
     
     fetchVideos();
-
   }, [authLoading, userProfile, router, fetchVideos]);
 
   const handleVideoSaved = (savedVideo: Video) => {
@@ -113,18 +112,6 @@ export default function AdminVideosPage() {
       setEditingVideo(null);
     }
   };
-
-  if (authLoading && loadingData) {
-    return (
-      <div>
-        <PageTitle title={t('admin.videos.pageTitle')} />
-        <Skeleton className="h-12 w-32 mb-6" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>

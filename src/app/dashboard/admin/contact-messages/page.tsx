@@ -36,7 +36,7 @@ export default function AdminContactMessagesPage() {
 
   const fetchMessages = useCallback(async () => {
     let isMounted = true; 
-    if (isMounted) setLoadingData(true);
+    setLoadingData(true);
     try {
       const messagesQuery = query(collection(db, CONTACT_MESSAGES_COLLECTION), orderBy("submittedAt", "desc"));
       const querySnapshot = await getDocs(messagesQuery);
@@ -51,6 +51,7 @@ export default function AdminContactMessagesPage() {
       console.error("Error fetching messages:", error);
       if (isMounted) {
         toast({ title: t('general.error.title'), description: t('admin.contactMessages.toast.error.fetch'), variant: "destructive" });
+        setMessages([]);
       }
     } finally {
       if (isMounted) {
@@ -62,7 +63,6 @@ export default function AdminContactMessagesPage() {
 
   useEffect(() => {
     if (authLoading) {
-      setLoadingData(true);
       return;
     }
 
@@ -132,27 +132,26 @@ export default function AdminContactMessagesPage() {
   const formatDate = (timestamp: Timestamp | Date | undefined | string | number): string => {
     if (!timestamp) return t('general.notAvailableShort');
     try {
-      const date = timestamp instanceof Timestamp 
-        ? timestamp.toDate() 
-        : (typeof timestamp === 'string' || typeof timestamp === 'number' ? new Date(timestamp) : timestamp);
+      let date: Date;
+      if (timestamp instanceof Timestamp) {
+        date = timestamp.toDate();
+      } else if (typeof timestamp === 'string' || typeof timestamp === 'number') {
+        date = new Date(timestamp);
+      } else if (timestamp instanceof Date) {
+        date = timestamp;
+      } else {
+        return 'Invalid Date Input';
+      }
       
-      if (!(date instanceof Date) || isNaN(date.getTime())) {
+      if (isNaN(date.getTime())) {
         return 'Invalid Date'; 
       }
-      return format(date, 'PPP p');
+      return format(date, 'PPP p'); // Example: Jun 9, 2023, 3:30 PM
     } catch (e) {
+      console.error("Error formatting date:", e, "Input was:", timestamp);
       return 'Date Error';
     }
   };
-  
-  if (authLoading && loadingData) { 
-    return (
-      <div>
-        <PageTitle title={t('admin.contactMessages.pageTitle')} />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    );
-  }
   
   return (
     <div>
@@ -278,5 +277,3 @@ export default function AdminContactMessagesPage() {
     </div>
   );
 }
-
-    

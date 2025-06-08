@@ -11,7 +11,7 @@ import { collection, getDocs, query, orderBy, Timestamp, doc, deleteDoc } from "
 import { CalendarDays, PlusCircle, Trash2, Edit, ShieldCheck, Image as ImageIcon, Video } from "lucide-react";
 import Image from "next/image"; 
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react"; // Added useCallback
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import CeremonyForm from "@/components/admin/CeremonyForm";
@@ -45,14 +45,6 @@ export default function AdminCeremoniesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingCeremony, setEditingCeremony] = useState<Ceremony | null>(null);
 
-  // Effect for redirection
-  useEffect(() => {
-    if (!authLoading && userProfile &&
-        (userProfile.role !== USER_ROLES.CHURCH_ADMIN && userProfile.role !== USER_ROLES.SUPER_ADMIN)) {
-      router.push("/dashboard");
-    }
-  }, [userProfile, authLoading, router]);
-
   const fetchCeremonies = useCallback(async () => {
     setLoadingData(true);
     try {
@@ -66,23 +58,28 @@ export default function AdminCeremoniesPage() {
     } catch (error) {
       console.error("Error fetching ceremonies:", error);
       toast({ title: t('general.error.title'), description: t('admin.ceremonies.toast.error.fetch'), variant: "destructive" });
+      setCeremonies([]);
     } finally {
       setLoadingData(false);
     }
-  }, [t, toast]); // Dependencies for fetchCeremonies
+  }, [t, toast]);
 
-  // Effect for data fetching
   useEffect(() => {
-    if (!authLoading && userProfile) {
-      if (userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN) {
-        fetchCeremonies();
-      } else {
-        setLoadingData(false);
-      }
-    } else if (!authLoading && !userProfile) {
-      setLoadingData(false);
+    if (authLoading) {
+      return;
     }
-  }, [userProfile, authLoading, fetchCeremonies]);
+    if (!userProfile) {
+      setLoadingData(false);
+      return;
+    }
+    const isAuthorized = userProfile.role === USER_ROLES.CHURCH_ADMIN || userProfile.role === USER_ROLES.SUPER_ADMIN;
+    if (!isAuthorized) {
+      router.push("/dashboard");
+      setLoadingData(false);
+      return;
+    }
+    fetchCeremonies();
+  }, [userProfile, authLoading, router, fetchCeremonies]);
 
   const handleCeremonySaved = (savedCeremony: Ceremony) => {
     if (editingCeremony) {
@@ -116,10 +113,6 @@ export default function AdminCeremoniesPage() {
       setEditingCeremony(null);
     }
   };
-
-  if (authLoading) { 
-    return ( <div> <PageTitle title={t('admin.ceremonies.pageTitle')} /> <Skeleton className="h-12 w-32 mb-6" /> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)} </div> </div> );
-  }
 
   return (
     <div>

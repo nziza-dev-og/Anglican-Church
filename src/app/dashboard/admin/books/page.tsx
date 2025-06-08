@@ -53,7 +53,7 @@ export default function AdminBooksPage() {
     } catch (error) {
       console.error("Error fetching books:", error);
       toast({ title: t('general.error.unexpected'), description: t('admin.books.toast.error.fetch'), variant: "destructive" });
-      setBooks([]); // Explicitly clear books on error
+      setBooks([]);
     } finally {
       setLoadingData(false);
     }
@@ -61,12 +61,13 @@ export default function AdminBooksPage() {
 
   useEffect(() => {
     if (authLoading) {
-      setLoadingData(true); 
+      // DashboardLayout will show a spinner. Page keeps its loadingData true.
       return;
     }
 
     if (!userProfile) {
-      setLoadingData(false);
+      setLoadingData(false); // No user, so no data to load for this admin page
+      // router.push('/auth/login'); // Should be handled by DashboardLayout or AuthContext
       return;
     }
 
@@ -74,12 +75,11 @@ export default function AdminBooksPage() {
 
     if (!isAuthorized) {
       router.push("/dashboard");
-      setLoadingData(false); 
+      setLoadingData(false); // Not authorized, so no data to load for this page
       return;
     }
 
-    fetchBooks();
-
+    fetchBooks(); // Authorized, fetch data. fetchBooks will manage setLoadingData.
   }, [authLoading, userProfile, router, fetchBooks]);
 
 
@@ -116,17 +116,10 @@ export default function AdminBooksPage() {
     }
   };
 
-  if (authLoading && loadingData) { 
-    return (
-      <div>
-        <PageTitle title={t('admin.books.title')} />
-        <Skeleton className="h-12 w-32 mb-6" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
-        </div>
-      </div>
-    );
-  }
+  // If auth context is loading, DashboardLayout shows a spinner.
+  // This page waits for auth context to resolve before deciding to show its own content/skeletons.
+  // If authLoading is true, this component's render might be too early to show specific skeletons,
+  // so we rely on DashboardLayout's spinner, then this page's `loadingData`.
 
   return (
     <div>
