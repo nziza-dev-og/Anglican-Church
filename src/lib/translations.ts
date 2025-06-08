@@ -40,6 +40,7 @@ export const translations: Translations = {
   // Navigation
   'nav.home': { en: 'Home', rw: 'Ahabanza', fr: 'Accueil', sw: 'Nyumbani', es: 'Inicio', de: 'Startseite' },
   'nav.about': { en: 'About Us', rw: 'Abo Turibo', fr: 'À Propos', sw: 'Kuhusu Sisi', es: 'Nosotros', de: 'Über Uns' },
+  'nav.leadership': placeholder('Leadership'),
   'nav.books': { en: 'Books', rw: 'Ibitabo', fr: 'Livres', sw: 'Vitabu', es: 'Libros', de: 'Bücher' },
   'nav.choirs': { en: 'Choirs', rw: 'Amakorali', fr: 'Chorales', sw: 'Kwaya', es: 'Coros', de: 'Chöre' },
   'nav.unions': { en: 'Unions', rw: 'Amatsinda', fr: 'Unions', sw: 'Jumuiya', es: 'Uniones', de: 'Vereinigungen' },
@@ -299,6 +300,7 @@ export const translations: Translations = {
 
   // Home Page - AboutSnippet
   'home.aboutSnippet.title': placeholder('About Rubavu Anglican Church'),
+  'home.aboutSnippet.churchNamePlaceholder': placeholder('Rubavu Anglican Church'),
   'home.aboutSnippet.paragraph1': placeholder('The Anglican Church in Rubavu is a vibrant community dedicated to spiritual growth, fellowship, and serving our neighbours. We strive to be a beacon of hope and love in Rubavu.'),
   'home.aboutSnippet.mission.title': placeholder('Our Mission'),
   'home.aboutSnippet.mission.description': placeholder('To share the Gospel, nurture believers, and impact our community positively.'),
@@ -345,6 +347,14 @@ export const translations: Translations = {
   'choirs.empty.description': placeholder('Information about our choirs will be available soon.'),
   'choirs.card.chamber': placeholder('Chamber:'),
   'choirs.card.ledBy': placeholder('Led by dedicated administrators.'),
+  'choirs.joinRequest.button.request': placeholder('Request to Join'),
+  'choirs.joinRequest.button.requesting': placeholder('Requesting...'),
+  'choirs.joinRequest.button.pending': placeholder('Request Sent'),
+  'choirs.joinRequest.button.joined': placeholder('Joined'),
+  'choirs.joinRequest.button.loginToRequest': placeholder('Login to Request Join'),
+  'choirs.joinRequest.success.title': placeholder('Request Sent'),
+  'choirs.joinRequest.success.description': placeholder('Your request to join {{choirName}} has been sent for approval.'), // choirName will be interpolated
+  'choirs.joinRequest.error.description': placeholder('Failed to send join request. Please try again.'),
 
   // Events Page (Public)
   'events.title': placeholder('Church Events'),
@@ -677,6 +687,15 @@ export const translations: Translations = {
   'admin.contactMessages.toast.error.fetch': placeholder('Could not fetch messages.'),
   'admin.contactMessages.toast.error.update': placeholder('Could not update message status.'),
   'admin.contactMessages.toast.error.delete': placeholder('Could not delete message.'),
+
+  // Leadership Page
+  'leadership.page.title': placeholder('Our Leadership'),
+  'leadership.page.subtitle': placeholder('Meet the dedicated administrators of our church groups and ministries.'),
+  'leadership.page.empty.title': placeholder('No Group Administrators Found'),
+  'leadership.page.empty.description': placeholder('Information about group administrators will be available here once assigned.'),
+  'leadership.page.managesChoirs': placeholder('Administers Choirs:'),
+  'leadership.page.managesUnions': placeholder('Administers Unions:'),
+  'leadership.page.noGroupsManaged': placeholder('Not currently administering specific choirs or unions.'),
 
 
 };

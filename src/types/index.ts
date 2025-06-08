@@ -21,6 +21,7 @@ export interface UserProfile {
   role: UserRole;
   interests?: string[];
   createdAt: Timestamp;
+  phoneNumber?: string; // Added for leadership details
 }
 
 export interface ChurchEvent {
@@ -72,10 +73,10 @@ export interface Choir {
 }
 
 export interface ChoirMember {
-  id?: string; // choirId_userId
+  id?: string; // choirId_userId - or let Firestore auto-generate
   userId: string;
   choirId: string;
-  roleInChoir: string; // e.g., Singer, Instrumentalist
+  roleInChoir?: string; // e.g., Singer, Instrumentalist - Made optional
   joinDate: Timestamp;
   status: 'pending' | 'approved' | 'rejected'; // Managed by Choir Admin
 }
@@ -93,7 +94,7 @@ export interface ChurchUnion {
 }
 
 export interface UnionMember {
-  id?: string; // unionId_userId
+  id?: string; // unionId_userId - or let Firestore auto-generate
   userId: string;
   unionId: string;
   joinDate: Timestamp;
@@ -144,4 +145,10 @@ export interface Recommendation {
   title: string;
   description: string;
   link: string;
+}
+
+// For the new leadership page
+export interface ProcessedLeader extends UserProfile {
+  managedChoirs: { id: string, name: string }[];
+  managedUnions: { id: string, name: string }[];
 }

@@ -14,13 +14,14 @@ import {
   Info,
   CalendarDays,
   BookOpen,
-  Users, 
+  Users as UsersIcon, // Renamed to avoid conflict with Users type
   Music,
   Handshake,
   Video,
   ShieldCheck,
   Mails, 
   MessageSquare,
+  Briefcase, // Added for Leadership
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,6 +63,7 @@ export default function Header() {
   const NAV_ITEMS: NavLink[] = [
     { labelKey: 'nav.home', href: '/', icon: <Home className="h-5 w-5" /> },
     { labelKey: 'nav.about', href: '/about', icon: <Info className="h-5 w-5" /> },
+    { labelKey: 'nav.leadership', href: '/leadership', icon: <Briefcase className="h-5 w-5" /> },
     { labelKey: 'nav.events', href: '/events', icon: <CalendarDays className="h-5 w-5" /> },
     { labelKey: 'nav.books', href: '/books', icon: <BookOpen className="h-5 w-5" /> },
     { labelKey: 'nav.choirs', href: '/choirs', icon: <Music className="h-5 w-5" /> },
